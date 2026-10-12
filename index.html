@@ -1876,11 +1876,10 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 #timelineFilterBtn{flex-shrink:0;white-space:nowrap}
 .timeline-search-box{min-width:0;flex:1}
 .timeline-search-box input{width:100%;min-width:0}
-#tagModalShell{max-width:560px;max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
-.timeline-date-filter{padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid #e2e8f0}
+#tagModalShell{max-width:448px;max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
+.timeline-date-filter{padding-top:14px;margin-top:14px;margin-bottom:16px;border-top:1px solid #e2e8f0}
 .timeline-filter-date-row{display:flex;align-items:flex-start;gap:12px;margin-top:10px}
 .timeline-filter-date-row>label{font-size:12px;color:#64748b;flex-shrink:0;padding-top:10px}
-.timeline-filter-date-note{font-size:11px;color:#94a3b8;line-height:1.6;margin-top:8px}
 @media(max-width:639px){.timeline-search-tools{width:100%;flex:0 1 auto}.timeline-search-box input{width:100%;min-width:0}#tagModalShell{padding:20px 16px}.timeline-filter-date-row{flex-direction:column;gap:5px}.timeline-filter-date-row>label{padding-top:0}}
 </style>
 </head>
@@ -2075,47 +2074,47 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                     <i class="fa-solid fa-tags text-indigo-600"></i>
                     <span>筛选</span>
                 </h3>
-                <button onclick="closetagModal()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center">
+                <button onclick="closeTagModal()" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <section class="timeline-date-filter">
-                <h4 class="text-xs font-bold text-slate-700 mb-2">日期范围</h4>
-                <div class="timeline-filter-date-row"><label>开始日期</label><div id="timelineFilterStartFields"></div></div>
-                <div class="timeline-filter-date-row"><label>结束日期</label><div id="timelineFilterEndFields"></div></div>
-                <p class="timeline-filter-date-note">支持只填年、年月或年月日，留空表示不限；只填年或年月时按全年或整月筛选</p>
-                <p id="timelineFilterDateError" role="alert" class="hidden text-xs text-rose-500 mt-2"></p>
-            </section>
             <div id="tagListSection" class="mb-3">
                 <div id="tagFilterControls" class="mb-3">
                     <div class="text-xs font-bold text-slate-700 mb-2">筛选模式</div>
                     <div class="flex items-center gap-5 flex-wrap">
                         <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-                            <button type="button" id="tagModeIncludeBtn" onclick="settagFilterDraftMode('include')" class="px-3 py-1 rounded-md text-[11px] font-medium">包含</button>
-                            <button type="button" id="tagModeExcludeBtn" onclick="settagFilterDraftMode('exclude')" class="px-3 py-1 rounded-md text-[11px] font-medium">排除</button>
+                            <button type="button" id="tagModeIncludeBtn" onclick="setTagFilterDraftMode('include')" class="px-3 py-1 rounded-md text-[11px] font-medium">包含</button>
+                            <button type="button" id="tagModeExcludeBtn" onclick="setTagFilterDraftMode('exclude')" class="px-3 py-1 rounded-md text-[11px] font-medium">排除</button>
                         </div>
                         <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-                            <button type="button" id="tagMatchAnyBtn" onclick="settagFilterDraftMatch('any')" class="px-3 py-1 rounded-md text-[11px] font-medium">任一</button>
-                            <button type="button" id="tagMatchAllBtn" onclick="settagFilterDraftMatch('all')" class="px-3 py-1 rounded-md text-[11px] font-medium">全部</button>
+                            <button type="button" id="tagMatchAnyBtn" onclick="setTagFilterDraftMatch('any')" class="px-3 py-1 rounded-md text-[11px] font-medium">任一</button>
+                            <button type="button" id="tagMatchAllBtn" onclick="setTagFilterDraftMatch('all')" class="px-3 py-1 rounded-md text-[11px] font-medium">全部</button>
                         </div>
                     </div>
                     <p id="tagFilterHint" class="mt-2 text-[10px] leading-4 text-slate-400"></p>
                 </div>
             <div id="tagInputContainer" class="mb-3">
-                <label class="block text-xs font-bold text-slate-700 mb-2">新增tag</label>
-                <div class="flex gap-2 items-start"><div class="flex-grow"><input type="text" id="newtagInput" placeholder="输入新tag名称" oninput="updatetagNameDuplicateHint()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500"><p id="tagNameDuplicateHint" class="hidden mt-1 text-[11px] text-rose-600">该名称已存在</p></div><button onclick="addNewtagFromModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-medium shrink-0 self-start">新建tag</button></div>
+                <label class="block text-xs font-bold text-slate-700 mb-2">新增Tag</label>
+                <div class="flex gap-2 items-start"><div class="flex-grow"><input type="text" id="newTagInput" placeholder="输入新Tag名称" oninput="updateTagNameDuplicateHint()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500"><p id="tagNameDuplicateHint" class="hidden mt-1 text-[11px] text-rose-600">该名称已存在</p></div><button onclick="addNewTagFromModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs font-medium shrink-0 self-start">新建Tag</button></div>
             </div>
-                <div class="flex items-center justify-between gap-2 mb-2"><label class="text-xs font-bold text-slate-700">tag列表</label><div id="tagManageControls" class="hidden relative"><button type="button" onclick="toggletagManageCategoryMenu(event)" class="px-2 py-1 rounded-lg text-[11px] border border-slate-200 bg-slate-50 text-slate-600"><i class="fa-solid fa-filter text-[9px] text-indigo-500 mr-1"></i>分类 <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 ml-0.5"></i></button><div id="tagManageCategoryMenu" class="hidden absolute right-0 top-full mt-1 z-20 w-[78px] rounded-lg border border-slate-200 bg-white p-1 shadow-xl"><button data-tag-manage-category="all" onclick="settagManageCategory('all')" class="w-full text-left px-2 py-1.5 rounded-md text-[11px]"><i class="fa-solid fa-layer-group w-3.5 mr-1 text-slate-400"></i>全部</button><button data-tag-manage-category="mine" onclick="settagManageCategory('mine')" class="w-full text-left px-2 py-1.5 rounded-md text-[11px]"><i class="fa-solid fa-user w-3.5 mr-1 text-indigo-400"></i>我的</button><button data-tag-manage-category="other" onclick="settagManageCategory('other')" class="w-full text-left px-2 py-1.5 rounded-md text-[11px]"><i class="fa-solid fa-users w-3.5 mr-1 text-slate-400"></i>其他</button></div></div></div>
+                <div class="flex items-center justify-between gap-2 mb-2"><label class="text-xs font-bold text-slate-700">Tag列表</label><div id="tagManageControls" class="hidden relative"><button type="button" onclick="toggleTagManageCategoryMenu(event)" class="px-2 py-1 rounded-lg text-[11px] border border-slate-200 bg-slate-50 text-slate-600"><i class="fa-solid fa-filter text-[9px] text-indigo-500 mr-1"></i>分类 <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 ml-0.5"></i></button><div id="tagManageCategoryMenu" class="hidden absolute right-0 top-full mt-1 z-20 w-[78px] rounded-lg border border-slate-200 bg-white p-1 shadow-xl"><button data-tag-manage-category="all" onclick="setTagManageCategory('all')" class="w-full text-left px-2 py-1.5 rounded-md text-[11px]"><i class="fa-solid fa-layer-group w-3.5 mr-1 text-slate-400"></i>全部</button><button data-tag-manage-category="mine" onclick="setTagManageCategory('mine')" class="w-full text-left px-2 py-1.5 rounded-md text-[11px]"><i class="fa-solid fa-user w-3.5 mr-1 text-indigo-400"></i>我的</button><button data-tag-manage-category="other" onclick="setTagManageCategory('other')" class="w-full text-left px-2 py-1.5 rounded-md text-[11px]"><i class="fa-solid fa-users w-3.5 mr-1 text-slate-400"></i>其他</button></div></div></div>
                 <div id="tagModalList" class="flex flex-wrap gap-2 max-h-52 overflow-y-auto p-1"></div>
-                <p id="tagGeneralHint" class="mt-2 text-[10px] leading-4 text-slate-400">点击tag选中，可多选。</p>
+                <p id="tagGeneralHint" class="mt-2 text-[10px] leading-4 text-slate-400">点击Tag选中，可多选。</p>
             </div>
 
+
+            <section class="timeline-date-filter">
+                <h4 class="text-xs font-bold text-slate-700 mb-2">日期范围</h4>
+                <div class="timeline-filter-date-row"><label>开始日期</label><div id="timelineFilterStartFields"></div></div>
+                <div class="timeline-filter-date-row"><label>结束日期</label><div id="timelineFilterEndFields"></div></div>
+                <p id="timelineFilterDateError" role="alert" class="hidden text-xs text-rose-500 mt-2"></p>
+            </section>
 
             <div id="tagFilterFooter" class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
-                <button type="button" onclick="cleartagFilter()" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50">清除筛选</button>
+                <button type="button" onclick="clearTagFilter()" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50">清除筛选</button>
                 <div class="flex gap-2">
-                    <button type="button" onclick="closetagModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
-                    <button type="button" onclick="applytagFilter()" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">确定筛选</button>
+                    <button type="button" onclick="closeTagModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
+                    <button type="button" onclick="applyTagFilter()" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">确定筛选</button>
                 </div>
             </div>
         </div>
@@ -2353,7 +2352,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                     <div><h4 class="font-bold text-slate-800 mb-1">3. 评论区与互动通知</h4><p>打开事件详情页后，点击右上方的“评论区”按钮即可查看关于该事件的评论；点击“发表评论”可以发布评论，支持匿名发布功能；可以点赞或回复自己与他人的评论，发布的评论被点赞或回复后会收到互动通知，点击对应通知可直接定位到相关评论区。</p></div>
                     <div><h4 class="font-bold text-slate-800 mb-1">4. 节点之间的逻辑关系</h4><p>部分事件之间存在逻辑连线。在时间线上查看相关节点时，可以结合节点之间显示的连线及相关信息来更深入地了解事件。</p></div>
                     <div><h4 class="font-bold text-slate-800 mb-1">5. 搜索事件</h4><p>使用屏幕右侧的搜索功能时，时间线上会显示与之相匹配的事件。</p></div>
-                    <div><h4 class="font-bold text-slate-800 mb-1">6. Tag功能</h4><p>打开筛选窗口后可以按tag筛选时间线内容，并可选择“包含 / 排除”以及“任一 / 全部”等匹配方式，筛选生效后，时间线只会显示符合当前筛选条件的事件。</p></div>
+                    <div><h4 class="font-bold text-slate-800 mb-1">6. Tag功能</h4><p>打开筛选窗口后可以按Tag筛选时间线内容，并可选择“包含 / 排除”以及“任一 / 全部”等匹配方式，筛选生效后，时间线只会显示符合当前筛选条件的事件。</p></div>
                     <div><h4 class="font-bold text-slate-800 mb-1">7. 背景音乐</h4><p>点击顶部的“背景音乐”入口，进入后可以播放网站设置的音乐。</p></div>
                     <div><h4 class="font-bold text-slate-800 mb-1">8. 小晴儿</h4><p><strong><em>“我女儿。” “我们的女儿！” “我们俩女儿我们俩女儿...”</em></strong><br>相关功能请自己探索噢~保留一些对小晴儿的新鲜感。</p></div>
                 </div>
@@ -2372,7 +2371,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 
                     <div><h4 class="font-bold text-slate-800 mb-1">4. 选择节点类型</h4><p>节点类型会影响事件在时间线上的呈现方式。根据事件性质选择合适的节点类型即可，之后仍然可以重新编辑调整。</p></div>
 
-                    <div><h4 class="font-bold text-slate-800 mb-1">5. Tag功能</h4><p>Tag功能可以帮助整理和筛选事件。打开筛选窗口可以创建或编辑tag，也可以在编辑事件时为该事件添加Tag。</p></div>
+                    <div><h4 class="font-bold text-slate-800 mb-1">5. Tag功能</h4><p>Tag功能可以帮助整理和筛选事件。打开筛选窗口可以创建或编辑Tag，也可以在编辑事件时为该事件添加Tag。</p></div>
 
                     <div><h4 class="font-bold text-slate-800 mb-1">6. 逻辑连线</h4><p>逻辑连线用于表示事件之间存在关联。编辑事件时，可以在对应区域选择要连接的其他事件或时间，并设置这条连线的方向，也可以填写连线文字作为关系的补充说明。</p></div>
 
@@ -5686,7 +5685,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
         window.updateTagFilterHint = function() {
             const hint = document.getElementById('tagFilterHint');
             if (!hint) return;
-            hint.textContent = '请选择需要筛选的tag，可多选';
+            hint.textContent = '请选择需要筛选的Tag，可多选';
         };
 
         window.toggleTagDraft = function(tag) {
