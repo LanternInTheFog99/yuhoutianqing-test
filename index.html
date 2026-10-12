@@ -16963,12 +16963,41 @@ function wantedLayers(form,name,override=null){
  if(override)return [...new Set(override)];
  return [...baseLayers(form),...diffLayers(form,name)];
 }
-function showLayers(form,name,override=null){
- if(!pet||!pet.classList.contains('qinger-assets-ready'))return;
- const hatAnchor=document.getElementById('qingerHatAnchor');if(hatAnchor)hatAnchor.dataset.form=form;
+let petLayerVisualEpoch=0;
+function petImageReady(img){return !!img?.getAttribute('src')&&img.complete&&img.naturalWidth>0&&img.naturalHeight>0;}
+function loadPetImage(img,priority='high'){
+ if(!img)return Promise.resolve(false);
+ if(priority==='high'||img.fetchPriority!=='high')img.fetchPriority=priority;
+ if(petImageReady(img))return Promise.resolve(true);
+ if(img._qingerLoadPromise)return img._qingerLoadPromise;
+ const pending=new Promise(resolve=>{
+  let settled=false;const timer=setTimeout(()=>finish(false),30000);
+  const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);img.removeEventListener('load',onLoad);img.removeEventListener('error',onError);resolve(ok&&petImageReady(img));};
+  const onLoad=()=>finish(true),onError=()=>finish(false);
+  img.addEventListener('load',onLoad);img.addEventListener('error',onError);
+  if(!img.getAttribute('src'))img.src=img.dataset.assetSrc;
+  if(img.complete&&img.naturalWidth>0)finish(true);
+ });
+ img._qingerLoadPromise=pending;
+ pending.then(ok=>{if(!ok&&img._qingerLoadPromise===pending){img._qingerLoadPromise=null;img.removeAttribute('src');}});
+ return pending;
+}
+function petFrameImages(form,name,override=null){
  const wanted=new Set(wantedLayers(form,name,override));
- // All resources are already decoded. Toggle in one synchronous pass so no half-built frame is exposed.
- pet.querySelectorAll('.qpet-layer').forEach(x=>x.classList.toggle('on',x.dataset.form===form&&wanted.has(Number(x.dataset.layer))));
+ return [...pet.querySelectorAll('.qpet-layer')].filter(img=>img.dataset.form===form&&wanted.has(Number(img.dataset.layer)));
+}
+function showLayers(form,name,override=null){
+ if(name==='睡觉'||state.behavior==='nightSleepTransition')loadPetImage(document.getElementById('qingerSleepHat'));
+ if(!pet||!pet.classList.contains('qinger-assets-ready'))return;
+ const epoch=++petLayerVisualEpoch,imgs=petFrameImages(form,name,override),wanted=new Set(wantedLayers(form,name,override));
+ const apply=()=>{
+  if(epoch!==petLayerVisualEpoch)return;
+  const hatAnchor=document.getElementById('qingerHatAnchor');if(hatAnchor)hatAnchor.dataset.form=form;
+  pet.querySelectorAll('.qpet-layer').forEach(img=>img.classList.toggle('on',img.dataset.form===form&&wanted.has(Number(img.dataset.layer))));
+ };
+ if(imgs.every(petImageReady)){apply();return;}
+ // Keep the complete old frame until every layer of the requested frame is ready.
+ Promise.all(imgs.map(img=>loadPetImage(img))).then(ready=>{if(ready.every(Boolean))apply();else if(epoch===petLayerVisualEpoch)window.__loadDiagMark?.('小晴儿目标差分读取失败，保留完整旧画面');});
 }
 function render(name=state.base,form='normal'){
  state.base=baseOf(state.hunger); if(state.base!=='很饿'){cancelVeryHungryMove();veryHungryAtCorner=false;veryHungryMoved=false;clearVeryHungryVisuals()} pet?.classList.remove('pet-fainted','pet-sleeping','pet-excited','pet-sad','qinger-night-sleep-head-down');
@@ -17072,7 +17101,7 @@ function applyQingerPetCloudData(d,{live=false}={}){
  if(live&&!document.hidden&&!window.__qingerSilentRestore&&hasCloudSnapshot&&!state.testMode){for(let i=0;i<(Number(d.naturalLost)||0);i++)setTimeout(()=>floatHungerChange(-1),i*420);for(let i=0;i<(Number(d.forcedDrainTicks)||0);i++)setTimeout(()=>floatHungerChange(-0.5),i*520)}
  const initialSnapshot=!hasCloudSnapshot;
  if(initialSnapshot&&!state.testMode&&isNight()&&baseOf(state.hunger)!=='饿晕'){state.behavior='sleep';dozeMark('sleep');}
- hasCloudSnapshot=true;updateHud();syncRain();render();
+ hasCloudSnapshot=true;updateHud();syncRain();render();window.dispatchEvent?.(new Event('qinger-cloud-state-ready'));
  if(initialSnapshot&&!state.testMode&&state.base==='很饿'){
   cancelVeryHungryMove();clearTimeout(veryHungryCornerTimer);veryHungryCornerTimer=0;
   const target=veryHungryCornerTarget();
@@ -17542,33 +17571,36 @@ function scheduleBlink(){
 function strokeFeedback(){touch();if(state.base==='饿晕')return;if(state.base==='很饿'){pet.classList.add('pet-struggle');setTimeout(()=>pet.classList.remove('pet-struggle'),450);window.showXiaoqingerSimpleSpeech?.('……呜。');return}const map={'轻微饥饿':'普通','普通':'较饱','较饱':'最饱','最饱':'普通'};const v=map[state.base];if(v){showLayers('normal',v);const r=pet.getBoundingClientRect();const h=document.createElement('span');h.className='xiaoqinger-pet-heart';h.textContent='♥';h.style.left=(r.left+r.width*.5)+'px';h.style.top=(Math.max(12,r.top-17))+'px';document.body.appendChild(h);setTimeout(()=>h.remove(),760);setTimeout(()=>render(),950)}}
 async function preloadPetLayers(){
  if(!pet)return false;
- const need=new Set();
- Object.values(NORMAL).forEach(a=>a.forEach(id=>need.add('normal:'+id)));
- Object.values(GRABBED).forEach(a=>a.forEach(id=>need.add('grabbed:'+id)));
- /* grabbed 与 normal 的部件编号对齐；预载 normal 用到的所有表情差分，供睡眠/惊醒/眨眼直接复用。 */
- Object.values(NORMAL).forEach(a=>a.forEach(id=>need.add('grabbed:'+id)));
- need.add('normal:21');
- const imgs=[...pet.querySelectorAll('.qpet-layer')].filter(img=>need.has(img.dataset.form+':'+img.dataset.layer));
- if(!imgs.length){console.error('小晴儿：没有创建正式分层节点');return false;}
- // PNG assets use content-hashed local paths. Wait for browser image load only; do not make
- // visibility depend on decode(), whose behaviour differs across deployed browsers/WebViews.
- const results=await Promise.all(imgs.map(img=>new Promise(resolve=>{
-   let settled=false;const timer=setTimeout(()=>finish(false),30000);
-   const finish=(loaded=true)=>{if(settled)return;settled=true;clearTimeout(timer);img.removeEventListener('load',onLoad);img.removeEventListener('error',onError);resolve({ok:loaded&&img.naturalWidth>0&&img.naturalHeight>0,img})};
-   const onLoad=()=>finish(),onError=()=>finish(false);
-   if(img.complete){finish();return;}
-   img.addEventListener('load',onLoad,{once:true});
-   img.addEventListener('error',onError,{once:true});
- })));
- const bad=results.filter(x=>!x.ok);
- if(bad.length){console.error('小晴儿：分层素材加载失败',bad.map(x=>x.img.dataset.form+':'+x.img.dataset.layer));return false;}
- const wanted=new Set(wantedLayers('normal',baseOf(state.hunger)));
- imgs.forEach(x=>x.classList.toggle('on',x.dataset.form==='normal'&&wanted.has(Number(x.dataset.layer))));
- // Reveal only after the first complete frame exists. Inline visibility is cleared here because
- // the old position helper historically wrote !important visibility styles.
- pet.classList.add('qinger-assets-ready');
- pet.style.setProperty('visibility','visible','important');pet.style.setProperty('opacity','1','important');
- return true;
+ if(!hasCloudSnapshot){
+  if(window.__initialQingerPetData)applyQingerPetCloudData(window.__initialQingerPetData,{live:false});
+  if(!hasCloudSnapshot)await new Promise(resolve=>{
+   const ready=()=>{if(!hasCloudSnapshot)return;clearTimeout(timer);window.removeEventListener('qinger-cloud-state-ready',ready);resolve();};
+   const timer=setTimeout(()=>{window.removeEventListener('qinger-cloud-state-ready',ready);resolve();},90000);
+   window.addEventListener('qinger-cloud-state-ready',ready);ready();
+  });
+ }
+ if(!hasCloudSnapshot)return false;
+ for(let attempt=0;attempt<6;attempt++){
+  const base=baseOf(state.hunger),name=base==='饿晕'?'饿晕':state.behavior==='sleep'||state.behavior==='daynap'?'睡觉':base;
+  const imgs=petFrameImages('normal',name);
+  if(name==='睡觉'){const hat=document.getElementById('qingerSleepHat');if(hat)imgs.push(hat);}
+  if(!imgs.length)return false;
+  window.__loadDiagMark?.('优先加载小晴儿当前状态：'+name+'（'+imgs.length+' 个部件）');
+  const ready=await Promise.all(imgs.map(img=>loadPetImage(img)));
+  if(!ready.every(Boolean))return false;
+  const nextBase=baseOf(state.hunger),nextName=nextBase==='饿晕'?'饿晕':state.behavior==='sleep'||state.behavior==='daynap'?'睡觉':nextBase;
+  if(nextName!==name)continue;
+  const wanted=new Set(wantedLayers('normal',name));
+  pet.querySelectorAll('.qpet-layer').forEach(img=>img.classList.toggle('on',img.dataset.form==='normal'&&wanted.has(Number(img.dataset.layer))));
+  pet.classList.add('qinger-assets-ready');pet.style.setProperty('visibility','visible','important');pet.style.setProperty('opacity','1','important');
+  return true;
+ }
+ return false;
+}
+function preloadOtherPetLayers(){
+ const queue=[...pet.querySelectorAll('.qpet-layer'),document.getElementById('qingerSleepHat')].filter(img=>img&&!petImageReady(img));
+ const work=async()=>{while(queue.length){const img=queue.shift();await loadPetImage(img,'low');}};
+ Promise.all([work(),work()]).then(()=>window.__loadDiagMark?.('小晴儿其余差分后台预载完成'));
 }
 function createPetLayers(){
  pet=document.getElementById('xiaoqingerSimplePet');
@@ -17582,10 +17614,10 @@ function createPetLayers(){
  const assets=window.XIAOQINGER_LAYER_ASSETS||{};
  let createdNormal=0,createdGrabbed=0;
  for(const form of ['normal','grabbed']) for(const item of (assets[form]||[])){
-   const img=document.createElement('img');img.className='qpet-layer';img.alt='';img.dataset.form=form;img.dataset.layer=String(item.id);img.src=item.src;
+   const img=document.createElement('img');img.className='qpet-layer';img.alt='';img.dataset.form=form;img.dataset.layer=String(item.id);img.dataset.assetSrc=item.src;
    visualStage.appendChild(img);if(form==='normal')createdNormal++;else createdGrabbed++;
  }
- const hat=document.createElement('img');hat.id='qingerSleepHat';hat.alt='';hat.src=SLEEP_HAT;hat.setAttribute('aria-hidden','true');const hatAnchor=document.createElement('div');hatAnchor.id='qingerHatAnchor';hatAnchor.dataset.form='normal';hatAnchor.appendChild(hat);visualStage.appendChild(hatAnchor);
+ const hat=document.createElement('img');hat.id='qingerSleepHat';hat.alt='';hat.dataset.assetSrc=SLEEP_HAT;hat.setAttribute('aria-hidden','true');const hatAnchor=document.createElement('div');hatAnchor.id='qingerHatAnchor';hatAnchor.dataset.form='normal';hatAnchor.appendChild(hat);visualStage.appendChild(hatAnchor);
  pet.style.setProperty('display','block','important');
  pet.style.setProperty('visibility','hidden','important');
  pet.style.setProperty('opacity','0','important');
@@ -17646,7 +17678,7 @@ async function boot(){
  document.addEventListener('visibilitychange',()=>{if(document.hidden){++restoreEpoch;beginQuiet();}else restoreQuiet();});
  window.addEventListener('pagehide',()=>{++restoreEpoch;beginQuiet();});
  window.addEventListener('pageshow',e=>{if(e.persisted&&!document.hidden)restoreQuiet();});
- window.__appBootPetReady=true;window.__loadDiagMark?.('小晴儿素材准备完成');window.__tryFinishAppBoot?.();
+ window.__appBootPetReady=true;window.__loadDiagMark?.('小晴儿当前完整差分准备完成');window.__tryFinishAppBoot?.();setTimeout(preloadOtherPetLayers,500);
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,0),{once:true});else setTimeout(boot,0);
