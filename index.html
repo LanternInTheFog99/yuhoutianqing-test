@@ -1904,7 +1904,9 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 .filter-dual-range input:disabled::-webkit-slider-thumb{border-color:#cbd5e1;cursor:default}
 .filter-date-expand{display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b;padding:4px 0}
 .filter-date-expand i{font-size:9px;transition:transform .15s}
+#timelineDatePreciseFields{min-width:0;border:0;padding:0;margin:0}
 #timelineDatePreciseFields[hidden]{display:none}
+#timelineDatePreciseFields:disabled input{background:#f8fafc;color:#94a3b8;cursor:not-allowed}
 </style>
 </head>
 <!-- v35: head-motion branch from v32 -->
@@ -2136,10 +2138,10 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                     <input id="timelineDateEndSlider" type="range" min="0" max="1" step="1" value="1" aria-label="结束日期" oninput="changeTimelineDateSlider('end',this.value)">
                 </div>
                 <button id="timelineDateExpandBtn" type="button" aria-expanded="false" aria-controls="timelineDatePreciseFields" class="filter-date-expand" onclick="toggleTimelineDatePrecise()"><span>精确输入</span><i class="fa-solid fa-chevron-down"></i></button>
-                <div id="timelineDatePreciseFields" hidden>
+                <fieldset id="timelineDatePreciseFields" hidden>
                     <div class="timeline-filter-date-row"><label>开始日期</label><div id="timelineFilterStartFields"></div></div>
                     <div class="timeline-filter-date-row"><label>结束日期</label><div id="timelineFilterEndFields"></div></div>
-                </div>
+                </fieldset>
                 <p id="timelineFilterDateError" role="alert" class="hidden text-xs text-rose-500 mt-2"></p>
             </section>
 
@@ -2716,7 +2718,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             return Math.max(1, Math.min(20, v));
         })();
         window.activeHoverIntervals = {};
-        window.activeTagFilter = null;
         window.tagFilterMode = 'include';
         window.tagFilterMatch = 'any';
         window.tagFilterSelected = [];
@@ -5696,7 +5697,9 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             const dates=window.timelineDateDraft||{start:'',end:''},bounds=window.timelineDateDraftDays(dates);
             // Recompute from the complete current timeline; never retain a loading-time fallback.
             const domain=window.timelineDateBaseDomain();
-            for(const raw of [dates.start,dates.end]){
+            const noEventDates=domain.min===null||domain.max===null;
+            const precise=document.getElementById('timelineDatePreciseFields');if(precise)precise.disabled=noEventDates;
+            for(const raw of noEventDates?[]:[dates.start,dates.end]){
                 const range=raw?window.timelineDateBounds(raw):null;if(!range)continue;
                 const first=window.timelineDateToDay(range.start),last=window.timelineDateToDay(range.end);
                 if(first===null||last===null)continue;
@@ -5712,12 +5715,13 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 slider.setAttribute('aria-valuetext',dates[key]||(empty?'暂无日期':window.timelineDayToDate(value)));
             }
             const startLabel=document.getElementById('timelineDateStartLabel'),endLabel=document.getElementById('timelineDateEndLabel');
-            if(startLabel)startLabel.textContent=dates.start||(empty?'暂无日期':window.timelineDayToDate(start));
-            if(endLabel)endLabel.textContent=dates.end||(empty?'暂无日期':window.timelineDayToDate(end));
+            if(startLabel)startLabel.textContent=empty?'暂无日期':(dates.start||window.timelineDayToDate(start));
+            if(endLabel)endLabel.textContent=empty?'暂无日期':(dates.end||window.timelineDayToDate(end));
             const fill=document.getElementById('timelineDateRangeFill'),span=empty?1:Math.max(1,domain.max-domain.min);
             if(fill){fill.style.left=empty?'0%':(start-domain.min)/span*100+'%';fill.style.width=empty?'0%':Math.max(0,end-start)/span*100+'%';}
         };
         window.changeTimelineDateSlider=function(side,raw){
+            if(window.timelineDateBaseDomain().min===null)return;
             const domain=window.timelineDateSliderDomain||window.timelineDateBaseDomain(),draft=window.timelineDateDraft||{start:'',end:''};
             if(domain.min===null||domain.max===null)return;
             const bounds=window.timelineDateDraftDays(draft),start=bounds.start??domain.min,end=bounds.end??domain.max;
@@ -5728,6 +5732,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             window.renderTimelineFilterDateFields();window.updateTimelineDateSlider();
         };
         window.syncTimelineDateDraftFromInputs=function(){
+            if(window.timelineDateBaseDomain().min===null)return;
             if(window._timelineDateInputSyncing)return;
             window._timelineDateInputSyncing=true;
             try{const dates=window.readTimelineFilterDates();if(dates){window.timelineDateDraft=dates;window.updateTimelineDateSlider();}}
@@ -5741,7 +5746,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
         window.openTagModal = function() {
             window.tagManageCategory='all';
             document.getElementById('tagManageCategoryMenu')?.classList.add('hidden');
-            const tagInput=document.getElementById('tagInput'); if(tagInput) tagInput.value='';
             const shell=document.getElementById('tagModalShell');
             if(shell) shell.onclick=e=>{if(!e.target.closest('#tagManageControls'))document.getElementById('tagManageCategoryMenu')?.classList.add('hidden');};
             const inputContainer = document.getElementById('tagInputContainer');
@@ -5749,7 +5753,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 inputContainer.style.display = window.isLocked ? 'none' : 'block';
             }
             window.timelineDateDraft={...(window.timelineDateFilter||{start:'',end:''})};
-            window.timelineDateSliderDomain=null;
             window.renderTimelineFilterDateFields();window.updateTimelineDateSlider();
             const precise=document.getElementById('timelineDatePreciseFields');if(precise)precise.hidden=true;
             const expand=document.getElementById('timelineDateExpandBtn');if(expand){expand.setAttribute('aria-expanded','false');expand.querySelector('i')?.classList.remove('rotate-180');}
@@ -5807,7 +5810,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             window.tagFilterMode = window.tagFilterDraftMode === 'exclude' ? 'exclude' : 'include';
             window.tagFilterMatch = window.tagFilterDraftMatch === 'all' ? 'all' : 'any';
             window.tagFilterSelected = (window.tagFilterDraftSelected || []).slice();
-            window.activeTagFilter = window.tagFilterSelected.length === 1 ? window.tagFilterSelected[0] : null;
             window.closeTagModal();
             const timelineContainer = document.getElementById('timelineContainer');
             if (timelineContainer) timelineContainer.scrollLeft = 0;
@@ -5869,7 +5871,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                     const replaceIn=a=>Array.isArray(a)?a.map(x=>x===tagName?name:x):a;
                     window.tagFilterDraftSelected=replaceIn(window.tagFilterDraftSelected);
                     window.tagFilterSelected=replaceIn(window.tagFilterSelected);
-                    if(window.activeTagFilter===tagName)window.activeTagFilter=name;
                     window.events.forEach(ev=>{if(Array.isArray(ev.tagIds)&&ev.tagIds.map(String).includes(stableId))ev.tags=ev.tagIds.map(id=>window.tagNameById?.get(String(id))).filter(Boolean);});
                     window.renderTagModalList();window.renderEvents?.();window.updateTagFilterBadge?.();
                     window.showToast('Tag名称已修改','success');
@@ -5934,7 +5935,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             window.tagRecords = (window.tagRecords||[]).filter(x=>String(x?.name||x)!==tagName);
             window.tagFilterDraftSelected=(window.tagFilterDraftSelected||[]).filter(t=>t!==tagName);
             window.tagFilterSelected=(window.tagFilterSelected||[]).filter(t=>t!==tagName);
-            if(window.activeTagFilter===tagName)window.activeTagFilter=null;
             if(deletedId){window.tagNameById?.delete(String(deletedId));window.tagIdByName?.delete(tagName);window.events.forEach(ev=>{if(Array.isArray(ev.tagIds))ev.tags=ev.tagIds.map(id=>window.tagNameById?.get(String(id))).filter(Boolean);});}
             window.renderTagModalList?.();window.updateTagFilterBadge?.();window.renderEvents?.();
             window.showToast(`已移除Tag: ${tagName}`, "info");
@@ -6216,9 +6216,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                         return selected.some(t => tags.includes(t));
                     });
                 }
-            } else if (window.activeTagFilter) {
-                const tag = window.activeTagFilter;
-                list = list.filter(e => e.tags && e.tags.some(t => t === tag));
             }
             const query = String(document.getElementById('searchInput')?.value || '').trim().toLocaleLowerCase('zh-CN');
             if (query) {
@@ -6254,7 +6251,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             window.setTagFilterDraftMode('include');window.setTagFilterDraftMatch('any');
         };
         window.clearTimelineDateDraft=function(){
-            window.timelineDateDraft={start:'',end:''};window.timelineDateSliderDomain=null;
+            window.timelineDateDraft={start:'',end:''};
             window.renderTimelineFilterDateFields();window.updateTimelineDateSlider();
         };
 
