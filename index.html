@@ -1895,8 +1895,8 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 .filter-dual-range input[type=range]{position:absolute;width:calc(100% + 20px);left:-10px;top:0;height:40px;margin:0;background:transparent;appearance:none;-webkit-appearance:none;pointer-events:none;outline:none}
 .filter-dual-range input::-webkit-slider-runnable-track{height:4px;background:transparent}
 .filter-dual-range input::-moz-range-track{height:4px;background:transparent}
-.filter-dual-range input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid #6366f1;box-shadow:0 1px 4px #0002;margin-top:-8px;pointer-events:auto;cursor:grab}
-.filter-dual-range input::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid #6366f1;box-shadow:0 1px 4px #0002;pointer-events:auto;cursor:grab}
+.filter-dual-range input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #6366f1;box-shadow:0 1px 4px #0002;margin-top:-5px;pointer-events:auto;cursor:grab}
+.filter-dual-range input::-moz-range-thumb{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #6366f1;box-shadow:0 1px 4px #0002;pointer-events:auto;cursor:grab}
 #timelineDateStartSlider{z-index:2;transform:translateY(-3px)}
 #timelineDateEndSlider{z-index:3;transform:translateY(3px)}
 .filter-dual-range input:focus-visible::-webkit-slider-thumb{outline:3px solid #c7d2fe;outline-offset:2px}
@@ -5690,29 +5690,36 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 if(start===null||end===null)continue;
                 min=min===null?start:Math.min(min,start);max=max===null?end:Math.max(max,end);
             }
-            if(min===null){const year=new Date().getFullYear();min=window.timelineDateToDay([year,1,1]);max=window.timelineDateToDay([year,12,31]);}
-            if(min===max){min=Math.max(0,min-1);max++;}
             return {min,max};
         };
         window.updateTimelineDateSlider=function(){
             const dates=window.timelineDateDraft||{start:'',end:''},bounds=window.timelineDateDraftDays(dates);
-            const domain=window.timelineDateSliderDomain||window.timelineDateBaseDomain();
-            for(const value of [bounds.start,bounds.end])if(value!==null){domain.min=Math.min(domain.min,value);domain.max=Math.max(domain.max,value);}
+            // Recompute from the complete current timeline; never retain a loading-time fallback.
+            const domain=window.timelineDateBaseDomain();
+            for(const raw of [dates.start,dates.end]){
+                const range=raw?window.timelineDateBounds(raw):null;if(!range)continue;
+                const first=window.timelineDateToDay(range.start),last=window.timelineDateToDay(range.end);
+                if(first===null||last===null)continue;
+                domain.min=domain.min===null?first:Math.min(domain.min,first);
+                domain.max=domain.max===null?last:Math.max(domain.max,last);
+            }
             window.timelineDateSliderDomain=domain;
-            const start=bounds.start??domain.min,end=bounds.end??domain.max;
+            const empty=domain.min===null||domain.max===null,start=bounds.start??domain.min,end=bounds.end??domain.max;
             const unsupported=!!((dates.start&&bounds.start===null)||(dates.end&&bounds.end===null));
             for(const [key,value] of [['start',start],['end',end]]){
                 const slider=document.getElementById(key==='start'?'timelineDateStartSlider':'timelineDateEndSlider');if(!slider)continue;
-                slider.min=domain.min;slider.max=domain.max;slider.value=value;slider.disabled=unsupported;
-                slider.setAttribute('aria-valuetext',dates[key]||'不限');
+                slider.min=empty?0:domain.min;slider.max=empty?1:domain.max;slider.value=empty?(key==='start'?0:1):value;slider.disabled=empty||unsupported||domain.min===domain.max;
+                slider.setAttribute('aria-valuetext',dates[key]||(empty?'暂无日期':window.timelineDayToDate(value)));
             }
             const startLabel=document.getElementById('timelineDateStartLabel'),endLabel=document.getElementById('timelineDateEndLabel');
-            if(startLabel)startLabel.textContent=dates.start||'不限';if(endLabel)endLabel.textContent=dates.end||'不限';
-            const fill=document.getElementById('timelineDateRangeFill'),span=Math.max(1,domain.max-domain.min);
-            if(fill){fill.style.left=(start-domain.min)/span*100+'%';fill.style.width=Math.max(0,end-start)/span*100+'%';}
+            if(startLabel)startLabel.textContent=dates.start||(empty?'暂无日期':window.timelineDayToDate(start));
+            if(endLabel)endLabel.textContent=dates.end||(empty?'暂无日期':window.timelineDayToDate(end));
+            const fill=document.getElementById('timelineDateRangeFill'),span=empty?1:Math.max(1,domain.max-domain.min);
+            if(fill){fill.style.left=empty?'0%':(start-domain.min)/span*100+'%';fill.style.width=empty?'0%':Math.max(0,end-start)/span*100+'%';}
         };
         window.changeTimelineDateSlider=function(side,raw){
             const domain=window.timelineDateSliderDomain||window.timelineDateBaseDomain(),draft=window.timelineDateDraft||{start:'',end:''};
+            if(domain.min===null||domain.max===null)return;
             const bounds=window.timelineDateDraftDays(draft),start=bounds.start??domain.min,end=bounds.end??domain.max;
             let value=Math.round(Number(raw));if(!Number.isSafeInteger(value))return;
             value=Math.max(domain.min,Math.min(domain.max,value));
@@ -6172,6 +6179,8 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
         };
 
         window.renderEvents = function() {
+            const filterModal=document.getElementById('tagModal');
+            if(filterModal&&!filterModal.classList.contains('hidden'))window.updateTimelineDateSlider?.();
             const filtered = window.getFilteredEvents();
             const emptyState = document.getElementById('emptyState');
             if (filtered.length === 0) {
