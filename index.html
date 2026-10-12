@@ -716,11 +716,7 @@ setTimeout(function(){if(!window.__appBootDone&&(!window.__appBootDomReady||!win
         html[data-mobile-editing] #userSettingsBtn{position:static!important;transform:none!important}
         @media (any-pointer:coarse){
             #editModal .media-drag-item>div.absolute.inset-0,#multiTimeEventModal .media-drag-item>div.absolute.inset-0{opacity:1!important;background:rgba(0,0,0,.18);align-items:flex-start!important;padding-top:4px}
-            .touch-media-order{display:flex!important}
         }
-        .touch-media-order{display:none;gap:3px;align-items:center;position:relative;z-index:12;flex-shrink:0}
-        .media-drag-item:not(.video-edit-card)>.touch-media-order{position:absolute;bottom:1px;left:2px}
-        .touch-media-order button{min-height:24px!important;width:26px;height:24px;background:#fff;color:#334155;border:1px solid #cbd5e1;border-radius:5px;font-size:13px;line-height:1}
         /* === 每个事件独立留言板 / CloudBase message-api === */
         .event-comment-board{margin-top:28px;padding-top:24px;border-top:1px solid #1e293b;color:#e2e8f0}
         .event-comment-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
@@ -2343,7 +2339,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 
             <div class="flex items-center gap-3 w-full bg-slate-800/60 px-4 py-2.5 rounded-xl border border-slate-800 mt-3">
                 <span class="text-xs text-slate-400 font-medium shrink-0"><i class="fa-solid fa-magnifying-glass mr-1"></i>缩放:</span>
-                <input type="range" id="imageScaleSlider" min="0.001" max="20" step="0.001" value="1" oninput="handleImageScaleChange(this.value)" class="flex-grow h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                <input type="range" id="imageScaleSlider" min="0.01" max="5" step="0.001" value="1" oninput="handleImageScaleChange(this.value)" class="flex-grow h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
                 <span id="imageScaleText" class="text-xs font-mono text-indigo-400 w-12 text-right">100%</span>
             </div>
 
@@ -10518,7 +10514,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                             <span id="deepCropVideoTimeLabel" class="w-24 text-right font-mono text-[10px] text-slate-500">0:00 / 0:00</span>
                             <button id="deepCropSetCover" type="button" class="px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100"><i class="fa-solid fa-image mr-1"></i>设为视频封面</button>
                         </div>`:''}
-                        <div class="deep-crop-scale-row flex items-center gap-3 text-xs"><span class="font-semibold shrink-0">内容缩放</span><input id="deepCropScale" type="range" min="0.001" max="20" step="0.001" class="flex-1 h-2 accent-indigo-600 cursor-pointer" /><input id="deepCropScaleNumber" type="number" min="0.1" max="2000" step="0.1" class="w-20 px-2 py-1 border rounded-md font-mono text-xs text-right" /><span id="deepCropScaleValue" class="w-14 text-right font-mono text-slate-600">100%</span></div><div class="deep-crop-actions flex justify-between gap-2 mt-4"><div class="flex gap-2"><button id="deepCropAutoFill" class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-semibold">自动填充</button><button id="deepCropUndoAutoFill" class="px-3 py-2 border border-slate-200 bg-white text-slate-500 rounded-lg text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed" disabled>取消填充</button></div><div class="flex gap-2"><button id="deepCropCancel" class="px-4 py-2 border rounded-lg text-sm">取消</button><button id="deepCropReset" class="px-4 py-2 border rounded-lg text-sm">恢复原图</button><button id="deepCropOk" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">确定</button></div></div>
+                        <div class="deep-crop-scale-row flex items-center gap-3 text-xs"><span class="font-semibold shrink-0">内容缩放</span><input id="deepCropScale" type="range" min="0.01" max="20" step="0.001" class="flex-1 h-2 accent-indigo-600 cursor-pointer" /><input id="deepCropScaleNumber" type="number" min="1" max="2000" step="0.1" class="w-20 px-2 py-1 border rounded-md font-mono text-xs text-right" /><span id="deepCropScaleValue" class="w-14 text-right font-mono text-slate-600">100%</span></div><div class="deep-crop-actions flex justify-between gap-2 mt-4"><div class="flex gap-2"><button id="deepCropAutoFill" class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-semibold">自动填充</button><button id="deepCropUndoAutoFill" class="px-3 py-2 border border-slate-200 bg-white text-slate-500 rounded-lg text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed" disabled>取消填充</button></div><div class="flex gap-2"><button id="deepCropCancel" class="px-4 py-2 border rounded-lg text-sm">取消</button><button id="deepCropReset" class="px-4 py-2 border rounded-lg text-sm">恢复原图</button><button id="deepCropOk" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">确定</button></div></div>
                     </div>
                 </div>`;
             const viewport=document.getElementById('deepCropViewport'),wrap=document.getElementById('deepCropPreviewWrap'),preview=document.getElementById('deepCropPreview');
@@ -10623,11 +10619,11 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 preview.style.transform=`scale(${displayScale})`;
             };
             const syncScaleUI=()=>{scaleInput.value=crop.scale.toFixed(3);if(scaleNumber)scaleNumber.value=String(Number((crop.scale*100).toFixed(1)));if(scaleValue)scaleValue.textContent=Number((crop.scale*100).toFixed(1))+'%';};
-            const paint=()=>{raf=0;crop.scale=Math.max(.001,Math.min(20,Number(crop.scale)||1));syncScaleUI();media.style.transform=`translate(-50%,-50%) translate(${crop.offsetX}px,${crop.offsetY}px) scale(${crop.scale}) scale(${crop.stretchX||1},${crop.stretchY||1})`;};
-            const update=()=>{if(!raf)raf=requestAnimationFrame(paint);};scaleInput.oninput=()=>{crop.scale=Math.max(.001,Math.min(20,Number(scaleInput.value)||1));update();};if(scaleNumber){const applyNumber=()=>{crop.scale=Math.max(.001,Math.min(20,(Number(scaleNumber.value)||100)/100));update();};scaleNumber.onchange=applyNumber;scaleNumber.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();applyNumber();scaleNumber.blur();}};}preview.onwheel=e=>{e.preventDefault();crop.scale=Math.max(.001,Math.min(20,crop.scale+(e.deltaY<0?.02:-.02)));update();};
+            const paint=()=>{raf=0;crop.scale=Math.max(.01,Math.min(20,Number(crop.scale)||1));syncScaleUI();media.style.transform=`translate(-50%,-50%) translate(${crop.offsetX}px,${crop.offsetY}px) scale(${crop.scale}) scale(${crop.stretchX||1},${crop.stretchY||1})`;};
+            const update=()=>{if(!raf)raf=requestAnimationFrame(paint);};scaleInput.oninput=()=>{crop.scale=Math.max(.01,Math.min(20,Number(scaleInput.value)||1));update();};if(scaleNumber){const applyNumber=()=>{crop.scale=Math.max(.01,Math.min(20,(Number(scaleNumber.value)||100)/100));update();};scaleNumber.onchange=applyNumber;scaleNumber.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();applyNumber();scaleNumber.blur();}};}preview.onwheel=e=>{e.preventDefault();crop.scale=Math.max(.01,Math.min(20,crop.scale+(e.deltaY<0?.02:-.02)));update();};
             let drag=null;preview.onpointerdown=e=>{e.preventDefault();drag={sx:e.clientX,sy:e.clientY,ox:crop.offsetX,oy:crop.offsetY,id:e.pointerId};preview.setPointerCapture?.(e.pointerId);preview.style.cursor='grabbing';};preview.onpointermove=e=>{if(!drag)return;e.preventDefault();crop.offsetX=drag.ox+(e.clientX-drag.sx)/Math.max(.001,displayScale);crop.offsetY=drag.oy+(e.clientY-drag.sy)/Math.max(.001,displayScale);update();};const endDrag=()=>{drag=null;preview.style.cursor='grab';};preview.onpointerup=endDrag;preview.onpointercancel=endDrag;preview.style.cursor='grab';preview.style.touchAction='none';
             window.bindMobileTransformGestures(preview,{
-                min:.001,max:20,onTakeover:()=>{drag=null;},
+                min:.01,max:20,onTakeover:()=>{drag=null;},
                 get:()=>{const r=preview.getBoundingClientRect();return {scale:crop.scale,x:r.width/2+crop.offsetX*displayScale,y:r.height/2+crop.offsetY*displayScale};},
                 apply:next=>{const r=preview.getBoundingClientRect();crop.scale=next.scale;crop.offsetX=(next.x-r.width/2)/Math.max(.001,displayScale);crop.offsetY=(next.y-r.height/2)/Math.max(.001,displayScale);update();}
             });
@@ -13260,30 +13256,55 @@ viewer.style.visibility='';
             });
         };
 
-        window.installTouchMediaOrderButtons=function(container,type){
+        window.bindTouchMediaSorting=function(container,type){
             if(!container||!window.isMobileEditingDevice?.())return;
-            container.querySelectorAll('.media-drag-item,.link-row,[data-multi-drag][data-key="links"]').forEach(item=>{
-                if(item.querySelector('.touch-media-order'))return;
-                const controls=document.createElement('div');controls.className='touch-media-order';
-                [-1,1].forEach(direction=>{
-                    const button=document.createElement('button');button.type='button';const vertical=type==='video'||type==='link'||['videos','links'].includes(item.dataset.key);button.textContent=vertical?(direction<0?'↑':'↓'):(direction<0?'←':'→');button.title=vertical?(direction<0?'向上移动':'向下移动'):(direction<0?'向前移动':'向后移动');button.setAttribute('aria-label',button.title);
-                    button.addEventListener('pointerdown',e=>e.stopPropagation());
-                    button.onclick=e=>{
-                        e.preventDefault();e.stopPropagation();if(!window.canEditNow?.()||(Number(window._cloudWriteLockDepth)||0)>0)return;
-                        const multi=item.hasAttribute('data-multi-drag');
-                        if(multi)window.multiPersistCurrentPage?.();
-                        const arr=multi?window.multiTimeDraft?.[Number(item.dataset.seg)]?.[item.dataset.key]:(type==='image'?window.editingImageFiles:type==='link'?window.editingLinks:window.editingVideos);
-                        const from=Number(multi?item.dataset.index:(type==='link'?item.dataset.linkIndex:item.dataset.mediaIndex)),to=from+direction;
-                        if(!Array.isArray(arr)||from<0||from>=arr.length||to<0||to>=arr.length)return;
-                        [arr[from],arr[to]]=[arr[to],arr[from]];
-                        if(multi)window.multiRenderCurrentPage();else if(type==='image')window.renderMicroPreviews();else if(type==='link')window.renderLinkPreviews();else window.renderVideoPreviews();
-                    };
-                    controls.appendChild(button);
-                });item.appendChild(controls);
-            });
+            container._touchSortCleanup?.();
+            const selector='.media-drag-item,.link-row,[data-multi-drag][data-key="links"]';
+            let session=null,timer=null,marked=null,suppressUntil=0;
+            const allowed=()=>window.canEditNow?.()&&(Number(window._cloudWriteLockDepth)||0)===0;
+            const mark=item=>{if(marked===item)return;if(marked){marked.style.outline='';marked.style.outlineOffset='';}marked=item;if(item){item.style.outline='2px solid #6366f1';item.style.outlineOffset='2px';}};
+            const cancel=()=>{clearTimeout(timer);timer=null;mark(null);if(session?.active){session.item.classList.remove('media-dragging');suppressUntil=Date.now()+500;container._touchSortSuppressUntil=suppressUntil;}session=null;};
+            const start=e=>{
+                if(e.touches.length!==1){cancel();return;}
+                const item=e.target.closest?.(selector);
+                if(!item||!container.contains(item)||e.target.closest?.('button,input,select,textarea,a')||!allowed())return;
+                cancel();const t=e.touches[0],multi=item.hasAttribute('data-multi-drag');
+                session={item,id:t.identifier,x:t.clientX,y:t.clientY,multi,seg:Number(item.dataset.seg),key:item.dataset.key,from:Number(multi?item.dataset.index:type==='link'?item.dataset.linkIndex:item.dataset.mediaIndex),active:false,target:null,after:false};
+                timer=setTimeout(()=>{if(!session||!allowed()){cancel();return;}session.active=true;session.item.classList.add('media-dragging');},350);
+            };
+            const move=e=>{
+                if(!session)return;if(e.touches.length!==1||!allowed()){cancel();return;}
+                const t=Array.from(e.touches).find(t=>t.identifier===session.id);if(!t)return;
+                if(!session.active){if(Math.hypot(t.clientX-session.x,t.clientY-session.y)>8)cancel();return;}
+                e.preventDefault();e.stopPropagation();
+                let scroll=container;while(scroll&&scroll!==document.body){if(scroll.scrollHeight>scroll.clientHeight+4&&/(auto|scroll)/.test(getComputedStyle(scroll).overflowY))break;scroll=scroll.parentElement;}
+                if(scroll){const r=scroll.getBoundingClientRect();if(t.clientY<r.top+35)scroll.scrollTop-=14;else if(t.clientY>r.bottom-35)scroll.scrollTop+=14;}
+                const item=document.elementFromPoint(t.clientX,t.clientY)?.closest?.(selector);
+                if(!item||!container.contains(item)||item===session.item||(session.multi&&(Number(item.dataset.seg)!==session.seg||item.dataset.key!==session.key))){session.target=null;mark(null);return;}
+                const r=item.getBoundingClientRect(),horizontal=(session.multi?session.key==='images':type==='image')&&Math.abs(r.top-session.item.getBoundingClientRect().top)<Math.max(8,r.height*.35);
+                session.target=Number(session.multi?item.dataset.index:type==='link'?item.dataset.linkIndex:item.dataset.mediaIndex);session.after=horizontal?t.clientX>r.left+r.width/2:t.clientY>r.top+r.height/2;mark(item);
+            };
+            const end=e=>{
+                if(!session)return;const d=session;
+                if(!Array.from(e.changedTouches||[]).some(t=>t.identifier===d.id))return;
+                if(d.active){e.preventDefault();e.stopPropagation();}cancel();
+                if(!d.active||d.target===null||!allowed())return;
+                if(d.multi)window.multiPersistCurrentPage?.();
+                const arr=d.multi?window.multiTimeDraft?.[d.seg]?.[d.key]:type==='image'?window.editingImageFiles:type==='link'?window.editingLinks:window.editingVideos;
+                if(!Array.isArray(arr)||d.from<0||d.from>=arr.length)return;
+                let to=d.target+(d.after?1:0);if(d.from<to)to--;to=Math.max(0,Math.min(arr.length-1,to));if(to===d.from)return;
+                const item=arr.splice(d.from,1)[0];arr.splice(to,0,item);
+                if(d.multi)window.multiRenderCurrentPage();else if(type==='image')window.renderMicroPreviews();else if(type==='link')window.renderLinkPreviews();else window.renderVideoPreviews();
+            };
+            const click=e=>{if(Date.now()<Math.max(suppressUntil,container._touchSortSuppressUntil||0)){e.preventDefault();e.stopImmediatePropagation();}};
+            const context=e=>{if(session){e.preventDefault();e.stopPropagation();}};
+            container.addEventListener('contextmenu',context);
+            container.addEventListener('touchstart',start,{passive:true});container.addEventListener('click',click,true);
+            document.addEventListener('touchmove',move,{passive:false});document.addEventListener('touchend',end,{passive:false});document.addEventListener('touchcancel',cancel);window.addEventListener('blur',cancel);
+            container._touchSortCleanup=()=>{cancel();container.removeEventListener('contextmenu',context);container.removeEventListener('touchstart',start);container.removeEventListener('click',click,true);document.removeEventListener('touchmove',move);document.removeEventListener('touchend',end);document.removeEventListener('touchcancel',cancel);window.removeEventListener('blur',cancel);};
         };
         window.initMediaDragDrop=function(container,type){
-            window.installTouchMediaOrderButtons(container,type);
+            window.bindTouchMediaSorting(container,type);
             if(!container||container.dataset.dragInited==='1') return;
             container.dataset.dragInited='1';
             let from=-1, over=-1, after=false;
@@ -13346,9 +13367,9 @@ viewer.style.visibility='';
                     <div class="min-w-0 flex-1"><div class="text-xs font-semibold text-slate-700 truncate">${window.escapeHtml(v.title||v.name||'未命名视频')}</div>
                         </div>
                     <span class="text-[10px] text-indigo-500 shrink-0">${Number(v.previewDuration)||4}s</span>
-                    ${document.getElementById('deepDescriptionToggle')?.checked ? `<button type="button" onclick="event.stopPropagation();openDeepDescriptionEditor('video',${idx})" data-deep-edit-btn class="px-2 py-1 bg-violet-50 text-violet-600 rounded text-[10px]">深入描述</button>` : ''}
                     <button type="button" onclick="event.stopPropagation();openVideoCropModal(${idx})" class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px]">截选</button>
                     <button type="button" onclick="event.stopPropagation();openVideoEditModal(${idx})" class="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-[10px]">编辑</button>
+                    ${document.getElementById('deepDescriptionToggle')?.checked ? `<button type="button" onclick="event.stopPropagation();openDeepDescriptionEditor('video',${idx})" data-deep-edit-btn class="px-2 py-1 bg-violet-50 text-violet-600 rounded text-[10px]">深入描述</button>` : ''}
                     <button type="button" onclick="event.stopPropagation();removeVideo(${idx})" class="text-rose-500 p-1" title="删除"><i class="fa-solid fa-xmark"></i></button>
                 </div>`).join('');
             if(!window.isLocked) window.initMediaDragDrop(container,'video');
@@ -13395,7 +13416,7 @@ viewer.style.visibility='';
                     ${locked ? '' : `<button type="button" onclick="event.stopPropagation();openEditLinkModal(${idx})" class="text-slate-400 hover:text-indigo-600 shrink-0 p-1" title="编辑"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="event.stopPropagation();removeWebLink(${idx})" class="text-rose-500 hover:text-rose-700 shrink-0 p-1" title="删除"><i class="fa-solid fa-xmark"></i></button>`}
                 </div>
             `).join('');
-            if (!locked){window.installTouchMediaOrderButtons(container,'link');window.initLinkDragDrop(container);}
+            if (!locked){window.bindTouchMediaSorting(container,'link');window.initLinkDragDrop(container);}
         };
 
         window._linkDragFrom = null;
@@ -13899,7 +13920,7 @@ viewer.style.visibility='';
                 const cw = container.clientWidth;
                 const ch = container.clientHeight;
                 const fit = Math.min(cw / cropState.naturalWidth, ch / cropState.naturalHeight) * 0.92;
-                cropState.scale = Math.max(0.001, Math.min(20, fit));
+                cropState.scale = Math.max(0.01, Math.min(5, fit));
                 const dispW = cropState.naturalWidth * cropState.scale;
                 const dispH = cropState.naturalHeight * cropState.scale;
                 cropState.imgX = (cw - dispW) / 2;
@@ -13941,7 +13962,7 @@ viewer.style.visibility='';
         }
 
         window.handleImageScaleChange = function(val) {
-            const newScale = Math.max(0.001, Math.min(20, parseFloat(val) || 1));
+            const newScale = Math.max(0.01, Math.min(5, parseFloat(val) || 1));
             const oldScale = cropState.scale || 1;
             if (Math.abs(newScale - oldScale) < 1e-6) return;
 
@@ -14040,7 +14061,7 @@ viewer.style.visibility='';
             };
 
             window.bindMobileTransformGestures(container,{
-                min:.001,max:20,onTakeover:()=>{mode=null;handle=null;},
+                min:.01,max:5,onTakeover:()=>{mode=null;handle=null;},
                 get:()=>({scale:cropState.scale||1,x:cropState.imgX,y:cropState.imgY}),
                 apply:next=>{cropState.scale=next.scale;cropState.imgX=next.x;cropState.imgY=next.y;applyCropUI();}
             });
@@ -15404,7 +15425,7 @@ viewer.style.visibility='';
             window.multiRenderEditorShell();
         };
         window.multiMoveMedia=function(seg,key,from,to){const a=window.multiTimeDraft?.[seg]?.[key];if(!a||from<0||from>=a.length)return;to=Math.max(0,Math.min(a.length,to));if(from<to)to--;if(from===to)return;const [x]=a.splice(from,1);a.splice(to,0,x);window.multiRenderCurrentPage();};
-        window.multiBindDrag=function(){const root=document.getElementById('multiPageBody');window.installTouchMediaOrderButtons(root,'multi');if(!root||root.dataset.dragBound)return;root.dataset.dragBound='1';let drag=null,marked=null;const mark=x=>{if(marked===x)return;if(marked){marked.style.outline='';marked.style.outlineOffset='';}marked=x;if(marked){marked.style.outline='2px solid #6366f1';marked.style.outlineOffset='2px';}};const clear=()=>{root.querySelector('.opacity-50[data-multi-drag]')?.classList.remove('opacity-50');mark(null);};root.addEventListener('dragstart',e=>{const x=e.target.closest('[data-multi-drag]');if(!x)return;drag={seg:Number(x.dataset.seg),key:x.dataset.key,from:Number(x.dataset.index),over:Number(x.dataset.index),after:false};x.classList.add('opacity-50');try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(drag.from));}catch(_){}});root.addEventListener('dragend',()=>{clear();drag=null;});root.addEventListener('dragover',e=>{if(!drag)return;const x=e.target.closest('[data-multi-drag]');if(!x||Number(x.dataset.seg)!==drag.seg||x.dataset.key!==drag.key)return;e.preventDefault();drag.over=Number(x.dataset.index);const r=x.getBoundingClientRect();const horizontal=drag.key==='images';drag.after=horizontal?(e.clientX-r.left)>r.width/2:(e.clientY-r.top)>r.height/2;mark(x);try{e.dataTransfer.dropEffect='move';}catch(_){}});root.addEventListener('drop',e=>{if(!drag)return;e.preventDefault();const x=e.target.closest('[data-multi-drag]');if(x&&Number(x.dataset.seg)===drag.seg&&x.dataset.key===drag.key){drag.over=Number(x.dataset.index);const r=x.getBoundingClientRect();drag.after=drag.key==='images'?(e.clientX-r.left)>r.width/2:(e.clientY-r.top)>r.height/2;}const d=drag;clear();drag=null;if(Number.isInteger(d.over))window.multiMoveMedia(d.seg,d.key,d.from,d.over+(d.after?1:0));});};
+        window.multiBindDrag=function(){const root=document.getElementById('multiPageBody');window.bindTouchMediaSorting(root,'multi');if(!root||root.dataset.dragBound)return;root.dataset.dragBound='1';let drag=null,marked=null;const mark=x=>{if(marked===x)return;if(marked){marked.style.outline='';marked.style.outlineOffset='';}marked=x;if(marked){marked.style.outline='2px solid #6366f1';marked.style.outlineOffset='2px';}};const clear=()=>{root.querySelector('.opacity-50[data-multi-drag]')?.classList.remove('opacity-50');mark(null);};root.addEventListener('dragstart',e=>{const x=e.target.closest('[data-multi-drag]');if(!x)return;drag={seg:Number(x.dataset.seg),key:x.dataset.key,from:Number(x.dataset.index),over:Number(x.dataset.index),after:false};x.classList.add('opacity-50');try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(drag.from));}catch(_){}});root.addEventListener('dragend',()=>{clear();drag=null;});root.addEventListener('dragover',e=>{if(!drag)return;const x=e.target.closest('[data-multi-drag]');if(!x||Number(x.dataset.seg)!==drag.seg||x.dataset.key!==drag.key)return;e.preventDefault();drag.over=Number(x.dataset.index);const r=x.getBoundingClientRect();const horizontal=drag.key==='images';drag.after=horizontal?(e.clientX-r.left)>r.width/2:(e.clientY-r.top)>r.height/2;mark(x);try{e.dataTransfer.dropEffect='move';}catch(_){}});root.addEventListener('drop',e=>{if(!drag)return;e.preventDefault();const x=e.target.closest('[data-multi-drag]');if(x&&Number(x.dataset.seg)===drag.seg&&x.dataset.key===drag.key){drag.over=Number(x.dataset.index);const r=x.getBoundingClientRect();drag.after=drag.key==='images'?(e.clientX-r.left)>r.width/2:(e.clientY-r.top)>r.height/2;}const d=drag;clear();drag=null;if(Number.isInteger(d.over))window.multiMoveMedia(d.seg,d.key,d.from,d.over+(d.after?1:0));});};
 
         window.multiRenderConnectionPicker=function(){const list=document.getElementById('multiConnPickerList');if(!list)return;const q=(document.getElementById('multiConnSearch')?.value||'').trim().toLowerCase();const others=(window.events||[]).filter(e=>String(e.id)!==String(window.multiTimeEditingId)).filter(e=>{const d=window.formatDisplayDate(e.date);return !q||`${e.title||''} ${d} ${e.id}`.toLowerCase().includes(q);}).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.title||'').localeCompare(String(b.title||'')));list.innerHTML=others.length?others.map(e=>`<button type="button" onclick="multiPickConnectionEvent('${String(e.id).replace(/'/g,"\\'")}')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-indigo-50 text-xs text-slate-700 transition-colors"><span class="block font-medium truncate">${window.multiEsc(e.title||'未命名事件')}</span><span class="block mt-0.5 text-[10px] text-slate-400">${window.multiEsc(window.formatDisplayDate(e.date))}</span></button>`).join(''):'<div class="px-3 py-4 text-center text-[11px] text-slate-400">没有匹配事件</div>';};
         window.multiToggleConnPicker=function(){const p=document.getElementById('multiConnPicker');if(!p)return;const opening=p.classList.contains('hidden');p.classList.toggle('hidden');if(opening){const q=document.getElementById('multiConnSearch');if(q)q.value='';window.multiRenderConnectionPicker();const list=document.getElementById('multiConnPickerList');if(list)list.scrollTop=0;setTimeout(()=>{q?.focus();if(list)list.scrollTop=0;},0);}};
@@ -15483,7 +15504,7 @@ viewer.style.visibility='';
         window.multiSegmentPageHtml=function(segIndex){
             const s=window.multiTimeDraft[segIndex];if(!s)return'';
             const images=(s.images||[]).map((im,j)=>`<div draggable="true" data-multi-drag data-seg="${segIndex}" data-key="images" data-index="${j}" class="media-drag-item relative w-20 h-16 rounded-lg overflow-hidden border border-slate-200 bg-slate-900 group cursor-grab"><img src="${window.multiEsc(window.multiGetImageThumb(im))}" class="w-full h-full object-cover" draggable="false"><span class="absolute top-1 left-1 text-white/80 text-[9px]"><i class="fa-solid fa-grip-vertical"></i></span><div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1"><button type="button" onclick="event.stopPropagation();multiOpenCropModal(${segIndex},${j})" class="w-6 h-6 rounded-full bg-indigo-600 text-white" title="截选"><i class="fa-solid fa-crop text-[10px]"></i></button>${window.multiTimeDeepEnabledDraft?`<button type="button" data-deep-edit-btn onclick="event.stopPropagation();multiOpenDeepDescriptionEditor(${segIndex},'image',${j})" class="w-6 h-6 rounded-full bg-violet-600 text-white" title="深入描述"><i class="fa-solid fa-feather-pointed text-[10px]"></i></button>`:''}<button type="button" onclick="event.stopPropagation();multiRemoveMedia(${segIndex},'images',${j})" class="w-6 h-6 rounded-full bg-rose-600 text-white" title="删除"><i class="fa-solid fa-xmark text-[10px]"></i></button></div></div>`).join('');
-            const videos=(s.videos||[]).map((v,j)=>`<div draggable="true" data-multi-drag data-seg="${segIndex}" data-key="videos" data-index="${j}" class="media-drag-item video-edit-card border border-slate-200 rounded-lg px-2.5 py-2 flex items-center gap-2 cursor-grab bg-white"><i class="fa-solid fa-grip-vertical text-slate-300 text-[10px]"></i>${v.cover?`<img src="${window.multiEsc(v.cover)}" class="w-10 h-7 object-cover rounded">`:`<div class="w-10 h-7 bg-slate-100 rounded text-[9px] text-slate-400 flex items-center justify-center">视频</div>`}<div class="min-w-0 flex-1"><div class="text-xs font-semibold truncate text-slate-700">${window.multiEsc(v.title||'未命名视频')}</div></div><span class="text-[10px] text-indigo-500">${Number(v.previewDuration)||4}s</span><button type="button" onclick="multiOpenVideoEdit(${segIndex},${j})" class="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-[10px]">编辑</button>${window.multiTimeDeepEnabledDraft?`<button type="button" data-deep-edit-btn onclick="multiOpenDeepDescriptionEditor(${segIndex},'video',${j})" class="px-2 py-1 bg-violet-50 text-violet-600 rounded text-[10px]">深入描述</button>`:''}<button type="button" onclick="multiOpenVideoCropModal(${segIndex},${j})" class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px]">截选</button><button type="button" onclick="multiRemoveMedia(${segIndex},'videos',${j})" class="text-rose-500 w-6 h-6"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
+            const videos=(s.videos||[]).map((v,j)=>`<div draggable="true" data-multi-drag data-seg="${segIndex}" data-key="videos" data-index="${j}" class="media-drag-item video-edit-card border border-slate-200 rounded-lg px-2.5 py-2 flex items-center gap-2 cursor-grab bg-white"><i class="fa-solid fa-grip-vertical text-slate-300 text-[10px]"></i>${v.cover?`<img src="${window.multiEsc(v.cover)}" class="w-10 h-7 object-cover rounded">`:`<div class="w-10 h-7 bg-slate-100 rounded text-[9px] text-slate-400 flex items-center justify-center">视频</div>`}<div class="min-w-0 flex-1"><div class="text-xs font-semibold truncate text-slate-700">${window.multiEsc(v.title||'未命名视频')}</div></div><span class="text-[10px] text-indigo-500">${Number(v.previewDuration)||4}s</span><button type="button" onclick="multiOpenVideoCropModal(${segIndex},${j})" class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px]">截选</button><button type="button" onclick="multiOpenVideoEdit(${segIndex},${j})" class="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-[10px]">编辑</button>${window.multiTimeDeepEnabledDraft?`<button type="button" data-deep-edit-btn onclick="multiOpenDeepDescriptionEditor(${segIndex},'video',${j})" class="px-2 py-1 bg-violet-50 text-violet-600 rounded text-[10px]">深入描述</button>`:''}<button type="button" onclick="multiRemoveMedia(${segIndex},'videos',${j})" class="text-rose-500 w-6 h-6"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
             const links=(s.links||[]).map((l,j)=>`<div draggable="true" data-multi-drag data-seg="${segIndex}" data-key="links" data-index="${j}" class="flex items-center gap-2 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs cursor-grab bg-white"><i class="fa-solid fa-grip-vertical text-slate-300"></i><div class="min-w-0 flex-1 text-left truncate text-slate-700"><i class="fa-solid fa-globe text-indigo-500 mr-1"></i>${window.multiEsc(l.title||l.url)}</div><button type="button" onclick="event.stopPropagation();multiOpenLinkEdit(${segIndex},${j})" class="text-slate-400 hover:text-indigo-600 w-6 h-6" title="编辑"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="event.stopPropagation();multiRemoveMedia(${segIndex},'links',${j})" class="text-rose-500 w-6 h-6" title="删除"><i class="fa-solid fa-xmark"></i></button></div>`).join('');
             return `<div class="space-y-3.5">
                 <div>
