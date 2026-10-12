@@ -5,6 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <title>雨后天晴</title>
+<script id="mobile-load-diagnostics">
+(function(){
+    const firstScriptAt=performance.now(),records=[],errors=[];
+    const clean=value=>String(value||'').replace(/https?:\/\/[^\s)]+/g,'[请求地址]').replace(/(?:access|token|password|session)[=:][^\s&]+/gi,'[已隐藏]').slice(0,220);
+    const elapsed=value=>Number.isFinite(value)?(value/1000).toFixed(2)+' 秒':'未完成';
+    window.__loadDiagMark=function(label){records.push({label:clean(label),at:performance.now()});if(records.length>60)records.shift();};
+    window.__loadDiagRequestStart=function(label){const row={label:clean(label),at:performance.now(),pending:true};records.push(row);if(records.length>60)records.shift();return row;};
+    window.__loadDiagRequestEnd=function(row){if(row){row.pending=false;row.duration=performance.now()-row.at;}};
+    window.addEventListener('error',function(event){if(event.error||event.message){errors.push(clean(event.message||event.error?.message));}else{const target=event.target;errors.push('资源加载失败：'+(target?.tagName||'未知资源'));}if(errors.length>12)errors.shift();},true);
+    window.addEventListener('unhandledrejection',function(event){errors.push('异步错误：'+clean(event.reason?.message||event.reason));if(errors.length>12)errors.shift();});
+    const report=()=>{
+        const nav=performance.getEntriesByType('navigation')[0],lines=['加载诊断（不包含访问令牌或账号信息）','打开至今：'+elapsed(performance.now()),'最早脚本执行：'+elapsed(firstScriptAt),'屏幕：'+innerWidth+' × '+innerHeight,''];
+        if(nav){lines.push('网页首字节：'+(nav.responseStart?elapsed(nav.responseStart):'未记录'),'网页下载阶段：'+(nav.responseEnd?elapsed(nav.responseEnd-nav.responseStart):'尚未结束'),'网页内容接收完成：'+(nav.responseEnd?elapsed(nav.responseEnd):'尚未结束'),'DOM 解析完成：'+(nav.domContentLoadedEventStart?elapsed(nav.domContentLoadedEventStart):'尚未结束'),'网页传输量：'+(nav.transferSize?Math.round(nav.transferSize/1024)+' KB':'未记录／缓存'),'');}
+        lines.push('启动函数已定义：'+(typeof window.__startInitialCloud==='function'?'是':'否'),'DOM 已就绪：'+(window.__appBootDomReady?'是':'否'),'小晴儿素材已就绪：'+(window.__appBootPetReady?'是':'否'),'云端同步已就绪：'+(window.__appBootCloudReady?'是':'否'),'页面启动完成：'+(window.__appBootDone?'是':'否'),'','启动记录（起始时间 / 请求耗时）：');
+        records.forEach(row=>lines.push(elapsed(row.at)+' '+row.label+(row.pending?' — 等待中 '+elapsed(performance.now()-row.at):row.duration!==undefined?' — '+elapsed(row.duration):'')));
+        lines.push('','错误：');lines.push(...(errors.length?errors:['暂未记录错误']));return lines.join('\n');
+    };
+    let button,panel,output,refreshTimer;
+    const ensure=()=>{
+        if(button)return;
+        button=document.createElement('button');button.type='button';button.textContent='查看诊断';button.setAttribute('style','position:fixed;right:12px;bottom:16px;z-index:2147483647;padding:9px 14px;border:1px solid #cbd5e1;border-radius:8px;background:white;color:#334155;font:13px sans-serif;visibility:visible!important');
+        panel=document.createElement('div');panel.setAttribute('style','position:fixed;inset:12px;z-index:2147483647;background:#fff;color:#334155;border:1px solid #cbd5e1;border-radius:12px;padding:14px;overflow:auto;display:none;visibility:visible!important;font:12px sans-serif');
+        const close=document.createElement('button');close.type='button';close.textContent='关闭';close.setAttribute('style','float:right;padding:6px 12px;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;color:#334155');close.onclick=()=>{panel.style.display='none';clearInterval(refreshTimer);};
+        output=document.createElement('pre');output.setAttribute('style','clear:both;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.7 monospace;user-select:text');panel.appendChild(close);panel.appendChild(output);
+        button.onclick=()=>{output.textContent=report();panel.style.display='block';clearInterval(refreshTimer);refreshTimer=setInterval(()=>output.textContent=report(),1000);};
+        document.documentElement.appendChild(button);document.documentElement.appendChild(panel);
+    };
+    window.__showLoadDiagnostics=function(){ensure();button.style.display='block';};
+    window.__getLoadDiagnosticReport=report;
+    document.addEventListener('DOMContentLoaded',()=>window.__loadDiagMark('DOM 解析完成'),{once:true});
+    setTimeout(()=>{if(!window.__appBootDone)window.__showLoadDiagnostics();},8000);
+})();
+</script>
+
 <script>(function(){try{if(localStorage.getItem('qinger_visible')==='0')document.documentElement.classList.add('qinger-user-hidden')}catch(_){}})();</script>
 <style id="timeline-bundled-utilities">/*
 MIT License
@@ -47,8 +81,8 @@ SOFTWARE.
 window.__appBootDomReady=false;window.__appBootPetReady=false;window.__appBootCloudReady=false;window.__appBootDone=false;
 window.addEventListener('error',function(e){if(window.__appBootDone||!e.error)return;window.__appBootFailure?.('页面启动出错，请重新加载')});
 window.__retryAppBoot=function(){if(window.__appBootPetFailed||!window.__startInitialCloud){location.reload();return}var n=document.getElementById('appBootScreen');if(n){n.classList.remove('app-boot-failed');var t=n.querySelector('.app-boot-text');if(t)t.textContent='正在重新连接云端…';}window.__initialCloudSyncStarted=false;window.__startInitialCloud?.();};
-window.__appBootFailure=function(message){var n=document.getElementById('appBootScreen');if(!n||window.__appBootDone)return;n.classList.add('app-boot-visible','app-boot-failed');var t=n.querySelector('.app-boot-text');if(t)t.textContent=message||'页面加载失败，请检查网络后重新加载'};
-window.__tryFinishAppBoot=function(){if(window.__appBootDone||!window.__appBootDomReady||!window.__appBootPetReady||!window.__appBootCloudReady)return;window.__appBootDone=true;document.documentElement.classList.add('app-ready','app-pet-settling');document.getElementById('appBootScreen')?.remove();requestAnimationFrame(function(){requestAnimationFrame(function(){setTimeout(function(){document.documentElement.classList.remove('app-pet-settling')},120)})});};
+window.__appBootFailure=function(message){window.__loadDiagMark?.('启动失败：'+message);window.__showLoadDiagnostics?.();var n=document.getElementById('appBootScreen');if(!n||window.__appBootDone)return;n.classList.add('app-boot-visible','app-boot-failed');var t=n.querySelector('.app-boot-text');if(t)t.textContent=message||'页面加载失败，请检查网络后重新加载'};
+window.__tryFinishAppBoot=function(){if(window.__appBootDone||!window.__appBootDomReady||!window.__appBootPetReady||!window.__appBootCloudReady)return;window.__appBootDone=true;window.__loadDiagMark?.('页面启动完成');document.documentElement.classList.add('app-ready','app-pet-settling');document.getElementById('appBootScreen')?.remove();requestAnimationFrame(function(){requestAnimationFrame(function(){setTimeout(function(){document.documentElement.classList.remove('app-pet-settling')},120)})});};
 document.addEventListener('DOMContentLoaded',function(){window.__appBootDomReady=true;window.__startInitialCloud?.();window.__tryFinishAppBoot()},{once:true});
 setTimeout(function(){if(!window.__appBootDone&&!document.getElementById('appBootScreen')?.classList.contains('app-boot-failed')){var t=document.querySelector('#appBootScreen .app-boot-text');if(t)t.textContent='正在等待云端同步，网络较慢时可能需要一些时间…'}},20000);
 setTimeout(function(){if(!window.__appBootDone&&(!window.__appBootDomReady||!window.__startInitialCloud))window.__appBootFailure('页面启动未完成，请重新加载')},25000);
@@ -3706,6 +3740,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 
         window._invalidRoomControllers = window._invalidRoomControllers || new Set();
         async function timelineApiFetch(path, timeoutMs = 20000) {
+            const diagRequest=window.__loadDiagRequestStart?.('云端读取 '+String(path).split('&')[0]);
             if(window._invalidRoomAccess) throw Object.assign(new Error('此链接无效'),{code:'invalid_room_link'});
             const requestedAccountSession=window.getAccountSessionToken?.()||'';
             const controller = new AbortController();
@@ -3736,6 +3771,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 if(data?.accountState==='guest'&&requestedAccountSession===(window.getAccountSessionToken?.()||'')&&requestedAccountSession)window.accountClearSession?.();
                 return data;
             } finally {
+                window.__loadDiagRequestEnd?.(diagRequest);
                 clearTimeout(timer);
                 window._invalidRoomControllers?.delete(controller);
             }
@@ -3760,6 +3796,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 payload={...payload,clientId:window.getTimelineAuthClientId?.()||''};
             }
             const requestedAccountSession=window.getAccountSessionToken?.()||'';
+            const diagRequest=window.__loadDiagRequestStart?.('云端操作 '+String(action));
             const controller = new AbortController();
             window._invalidRoomControllers.add(controller);
             const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -3809,6 +3846,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 if (data.version) window._cloudbaseTimelineVersion = String(data.version);
                 return data;
             } finally {
+                window.__loadDiagRequestEnd?.(diagRequest);
                 clearTimeout(timer);
                 window._invalidRoomControllers?.delete(controller);
             }
@@ -4401,7 +4439,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 const partial = Array.isArray(window._cloudPartialFailures) ? window._cloudPartialFailures : [];
                 updateSyncStatus('synced', partial.length ? `已同步云端（${partial.join('、')}暂不可用）` : '已同步云端');
                 window.startTimelineVersionPolling?.();
-                window.__appBootCloudReady=true;
+                window.__appBootCloudReady=true;window.__loadDiagMark?.('首次云端同步完成');
                 window.__tryFinishAppBoot?.();
                 if (window.__initialPetSyncRetryNeeded) {
                     window.__initialPetSyncRetryNeeded = false;
@@ -15377,7 +15415,7 @@ viewer.style.visibility='';
         window.startTimelineApp = () => {
             if(window._invalidRoomAccess){ window.invalidateRoomAccess?.(); return; }
             window.updateLockButtonUI?.();
-            const startCloudOnce=()=>{if(window.__initialCloudSyncStarted)return;window.__initialCloudSyncStarted=true;initAppAndCloudSync().catch(()=>window.__appBootFailure?.('页面启动未完成，请重新加载'))};
+            const startCloudOnce=()=>{if(window.__initialCloudSyncStarted)return;window.__initialCloudSyncStarted=true;window.__loadDiagMark?.('开始首次云端同步');initAppAndCloudSync().catch(()=>window.__appBootFailure?.('页面启动未完成，请重新加载'))};
             window.__startInitialCloud=startCloudOnce;
             startCloudOnce();
         };
@@ -17606,7 +17644,7 @@ async function boot(){
  document.addEventListener('visibilitychange',()=>{if(document.hidden){++restoreEpoch;beginQuiet();}else restoreQuiet();});
  window.addEventListener('pagehide',()=>{++restoreEpoch;beginQuiet();});
  window.addEventListener('pageshow',e=>{if(e.persisted&&!document.hidden)restoreQuiet();});
- window.__appBootPetReady=true;window.__tryFinishAppBoot?.();
+ window.__appBootPetReady=true;window.__loadDiagMark?.('小晴儿素材准备完成');window.__tryFinishAppBoot?.();
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,0),{once:true});else setTimeout(boot,0);
