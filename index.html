@@ -2343,7 +2343,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 
             <div class="flex items-center gap-3 w-full bg-slate-800/60 px-4 py-2.5 rounded-xl border border-slate-800 mt-3">
                 <span class="text-xs text-slate-400 font-medium shrink-0"><i class="fa-solid fa-magnifying-glass mr-1"></i>缩放:</span>
-                <input type="range" id="imageScaleSlider" min="0.15" max="4" step="0.01" value="1" oninput="handleImageScaleChange(this.value)" class="flex-grow h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                <input type="range" id="imageScaleSlider" min="0.001" max="20" step="0.001" value="1" oninput="handleImageScaleChange(this.value)" class="flex-grow h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
                 <span id="imageScaleText" class="text-xs font-mono text-indigo-400 w-12 text-right">100%</span>
             </div>
 
@@ -7861,7 +7861,16 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             if(window.deepCanvasUndo.length>40) window.deepCanvasUndo.shift();
             window.deepCanvasRedo=[];
         };
-        window.deepRestoreState = function(st){ window.deepCanvasState=window.deepClone(st); window.deepCanvasSelected=null; window.renderDeepCanvas(); };
+        window.deepRestoreState = function(st){
+            const next=window.deepClone(st),previous=new Map((window.deepCanvasState?.items||[]).map(item=>[item.id,item]));
+            next.items=(next.items||[]).map(item=>{
+                const old=previous.get(item.id);
+                if(!old||old.type!==item.type||item.type!=='media')return item;
+                Object.keys(old).forEach(key=>{if(!(key in item))delete old[key];});
+                Object.assign(old,item);return old;
+            });
+            window.deepCanvasState=next;window.deepCanvasSelected=null;window.renderDeepCanvas();
+        };
         window.deepUndo = function(){ if(!window.deepCanvasUndo.length)return; window.deepCanvasRedo.push(window.deepClone(window.deepCanvasState)); window.deepRestoreState(window.deepCanvasUndo.pop()); };
         window.deepRedo = function(){ if(!window.deepCanvasRedo.length)return; window.deepCanvasUndo.push(window.deepClone(window.deepCanvasState)); window.deepRestoreState(window.deepCanvasRedo.pop()); };
         window.deepEsc = function(v){ return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
@@ -7938,24 +7947,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 canPan:e=>!window.deepDrawToolsActive&&!window.deepTextTool&&!e.target.closest?.('.deep-canvas-item,.deep-canvas-handle,.deep-layer-controls,.deep-video-controls'),
             });
         };
-        window.bindMobileVideoCoverGestures=function(){
-            const player=document.getElementById('videoCropPlayer'),host=player?.parentElement;if(!host)return;host.id='videoCropViewport';
-            window.videoCoverPreviewTransform={scale:1,x:0,y:0};player.style.transform='';
-            window.bindMobileTransformGestures(host,{
-                min:1,max:4,consumePanDown:false,canPan:e=>e.clientY<player.getBoundingClientRect().bottom-36,
-                get:()=>{const t=window.videoCoverPreviewTransform,r=host.getBoundingClientRect();return {scale:t.scale,x:r.width/2+t.x,y:r.height/2+t.y};},
-                apply:next=>{const r=host.getBoundingClientRect();const base=Math.min(player.clientWidth/Math.max(1,player.videoWidth),player.clientHeight/Math.max(1,player.videoHeight));const mx=Math.max(0,(player.videoWidth*base*next.scale-r.width)/2),my=Math.max(0,(player.videoHeight*base*next.scale-r.height)/2);window.videoCoverPreviewTransform={scale:next.scale,x:Math.max(-mx,Math.min(mx,next.x-r.width/2)),y:Math.max(-my,Math.min(my,next.y-r.height/2))};player.style.transform=`translate(${window.videoCoverPreviewTransform.x}px,${window.videoCoverPreviewTransform.y}px) scale(${next.scale})`;player.style.transformOrigin='center';}
-            });
-        };
-        window.videoCoverVisibleSourceRect=function(player){
-            const t=window.videoCoverPreviewTransform;if(!t||t.scale===1&&t.x===0&&t.y===0)return {x:0,y:0,w:player.videoWidth,h:player.videoHeight};
-            const r=player.parentElement.getBoundingClientRect(),base=Math.min(player.clientWidth/player.videoWidth,player.clientHeight/player.videoHeight),scale=base*t.scale;
-            if(!(scale>0))return {x:0,y:0,w:player.videoWidth,h:player.videoHeight};
-            const left=(r.width-player.videoWidth*scale)/2+t.x,top=(r.height-player.videoHeight*scale)/2+t.y;
-            const x=Math.max(0,Math.min(player.videoWidth-1,-left/scale)),y=Math.max(0,Math.min(player.videoHeight-1,-top/scale));
-            return {x,y,w:Math.max(1,Math.min(player.videoWidth-x,(r.width-Math.max(0,left))/scale)),h:Math.max(1,Math.min(player.videoHeight-y,(r.height-Math.max(0,top))/scale))};
-        };
-
         window.deepEnsureModal = function(){
             let m=document.getElementById('deepDescriptionModal'); if(m)return m;
             m=document.createElement('div'); m.id='deepDescriptionModal';
@@ -9675,6 +9666,14 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 range=sel.getRangeAt(0);
             }
             if(!range||range.collapsed||!editingEl.contains(range.commonAncestorContainer))return;
+            const bookmark=window.deepSavedTextSelectionSnapshot?{...window.deepSavedTextSelectionSnapshot}:null;
+            const restoreBookmark=()=>{
+                if(!bookmark)return;
+                window.deepSavedTextSelectionSnapshot={...bookmark};
+                if(window.isMobileEditingDevice?.())editingEl.focus({preventScroll:true});
+                window.deepRestoreTextSelection();
+                window.deepRememberTextSelection();
+            };
             if(kind==='opacity'){
                 const slider=document.getElementById('deepTextOpacity');if(slider?.disabled)return;
                 const pct=Math.max(0,Math.min(100,Number(val)||0));
@@ -9748,8 +9747,8 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                     const cmd=val==='center'?'justifyCenter':val==='right'?'justifyRight':'justifyLeft';
                     document.execCommand(cmd,false,null);
 
-                    // Keep a stable character-offset target for repeated left/center/right clicks.
-                    window.deepCaptureTextSelectionSnapshot?.();
+                    // Commands can collapse the native selection; retain the original character range.
+                    restoreBookmark();
                     const rebuilt=window.deepRangeFromTextSelectionSnapshot?.(editingEl);
                     if(rebuilt){
                         window.deepSavedTextRange=rebuilt.cloneRange();
@@ -9767,6 +9766,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 });
                 return;
             }else{return;}
+            restoreBookmark();
             window.deepSyncDecorationGeometry?.(editingEl);it.html=editingEl.innerHTML;it.text=editingEl.innerText||'';
             window.deepSyncFontSizeControls?.(it);window.deepSyncOpacityControl?.();window.deepSyncSelectedFormatFeedback?.();
         };
@@ -9953,7 +9953,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             video.src=item.src;video.playsInline=true;video.setAttribute('playsinline','');video.preload='metadata';
             host.insertBefore(video,host.firstChild);
             const c=item.crop||{scale:1,offsetX:0,offsetY:0,stretchX:1,stretchY:1};
-            const apply=()=>{const scale=Math.max(.01,Number(c.scale)||1),sx=Math.max(.85,Math.min(1.15,Number(c.stretchX)||1)),sy=Math.max(.85,Math.min(1.15,Number(c.stretchY)||1));video.style.width='auto';video.style.height='auto';video.style.left='50%';video.style.top='50%';video.style.transform=`translate(-50%,-50%) translate(${Number(c.offsetX)||0}px,${Number(c.offsetY)||0}px) scale(${scale}) scale(${sx},${sy})`;};
+            const apply=()=>{const scale=Math.max(.001,Number(c.scale)||1),sx=Math.max(.85,Math.min(1.15,Number(c.stretchX)||1)),sy=Math.max(.85,Math.min(1.15,Number(c.stretchY)||1));video.style.width='auto';video.style.height='auto';video.style.left='50%';video.style.top='50%';video.style.transform=`translate(-50%,-50%) translate(${Number(c.offsetX)||0}px,${Number(c.offsetY)||0}px) scale(${scale}) scale(${sx},${sy})`;};
             video.addEventListener('loadedmetadata',apply,{once:true});apply();
             window.deepAttachVideoControls(host,video);
             const begin=()=>{ try{video.currentTime=Math.max(0,Number(startTime)||0);}catch(_){} video.play().catch(()=>{}); };
@@ -10229,8 +10229,8 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                     if(live&&node._deepBoundItem===live&&node._deepMediaSignature===signature)preservedMedia.set(id,node);
                 });
                 // 先摘下媒体节点，避免 innerHTML 清空时让所有图片/GIF/视频重新加载。
-                preservedMedia.forEach(node=>{try{node.remove();}catch(_){}});
-                st.innerHTML='';st.style.width=(window.deepCanvasState.width||2200)+'px';st.style.height=(window.deepCanvasState.height||1400)+'px';
+                Array.from(st.childNodes).forEach(node=>{if(!Array.from(preservedMedia.values()).includes(node))node.remove();});
+                st.style.width=(window.deepCanvasState.width||2200)+'px';st.style.height=(window.deepCanvasState.height||1400)+'px';
             }
             else {window.deepCanvasState.items.forEach(it=>{const el=st.querySelector(`[data-deep-id="${CSS.escape(it.id)}"]`);if(el){el.style.left=it.x+'px';el.style.top=it.y+'px';el.style.width=it.w+'px';el.style.height=it.h+'px';if(it.type==='text'){const fs=Math.max(6,Math.min(240,Number(it.fontSize)||18));el.style.fontSize=fs+'px';el.dataset.fontSize=(Math.round(fs*10)/10).toString();const tc=el.querySelector('.deep-text-content');if(tc){window.deepApplyCanonicalTextBoxStyle(tc,{editing:!!it.editing,height:it.h});tc.style.fontSize=fs+'px';tc.style.textAlign=it.textAlign||'left';}}}}); const selectedText=window.deepCanvasState.items.find(x=>x.id===window.deepCanvasSelected&&x.type==='text');if(selectedText)window.deepSyncFontSizeControls(selectedText); window.deepRenderDrawPaths?.(); window.deepUpdateConnectors(); window.deepUpdateTextToolControls?.(); window.deepSyncOpacityControl?.(); window.deepPositionTextTools?.(); return;}
             window.deepUpdateConnectors();
@@ -10238,11 +10238,11 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 if(item.type==='draw')return;
                 const reusedMedia=item.type==='media'?preservedMedia.get(item.id):null;
                 const el=reusedMedia||document.createElement('div');
-                if(reusedMedia){ preservedMedia.delete(item.id); el.replaceChildren(...Array.from(el.childNodes)); }
+                if(reusedMedia){ preservedMedia.delete(item.id); }
                 el.className='deep-canvas-item '+(item.type==='media'?'deep-canvas-media ':'')+(item.type==='text'?'deep-canvas-text ':'')+(item.type==='link'?'deep-canvas-link ':'')+(item.id===window.deepCanvasSelected?' deep-canvas-selected ':'')+(item.type==='text' && (window.deepTextTool||item.editing)?' tool-visible':''); el.dataset.deepId=item.id; el.style.left=item.x+'px';el.style.top=item.y+'px';el.style.width=item.w+'px';el.style.height=item.h+'px'; if(['media','text','link'].includes(item.type))el.style.zIndex=String(20+(Number(item.layer)||0)); if(window.deepConnectPending?.includes(item.id))el.classList.add('deep-connect-pending');
                 if(item.type==='text'){el.classList.toggle('has-border',!!item.border);el.classList.toggle('editing',!!item.editing);el.dataset.fontSize=(Math.round((Number(item.fontSize)||18)*10)/10).toString();el.style.borderColor=item.borderColor||'#3b82f6';el.style.fontSize=(item.fontSize||18)+'px';el.style.color=item.color||'#334155';el.style.textAlign=item.textAlign||'left';el.style.opacity='1';el.style.fontWeight=item.bold?'700':'400';el.style.fontStyle=item.italic?'italic':'normal';el.style.textDecoration='none';el.innerHTML=`<div class="deep-text-content">${item.html||window.deepEsc(item.text||'')}</div>`; const tc=el.querySelector('.deep-text-content'); if(tc) tc.contentEditable=item.editing?'true':'false'; if(tc){window.deepApplyCanonicalTextBoxStyle(tc,{editing:!!item.editing,height:item.h});tc.style.fontSize=(item.fontSize||18)+'px';tc.style.opacity=item.opacity??1;tc.style.textAlign=item.textAlign||'left';tc.style.textDecoration=[item.underline?'underline':'',item.strike?'line-through':''].filter(Boolean).join(' ')||'none';tc.style.textDecorationColor='currentColor';tc.style.textDecorationSkipInk='none';window.deepSyncDecorationGeometry?.(tc);requestAnimationFrame(()=>{const live=document.querySelector(`[data-deep-id="${CSS.escape(item.id)}"] .deep-text-content`);if(live){window.deepSyncDecorationGeometry?.(live);if(!item._manualResizing)window.deepAutoFitTextItem(item,live);if(item.editing)window.deepBindTextAutoFit(item,live);}});}}
-                else if(item.type==='media'){const c=item.crop||{scale:1,offsetX:0,offsetY:0,stretchX:1,stretchY:1};if(item.mediaKind==='video'){if(!reusedMedia){el.innerHTML='';window.deepRenderVideoCover(el,item,false);}}else{const deepAnimated=window.isAnimatedImageSource(item.src,item),deepShown=deepAnimated&&item.gifCover?item.gifCover:item.src;if(!reusedMedia||!el.firstElementChild||el.firstElementChild.getAttribute('src')!==deepShown){el.innerHTML=`<img src="${window.deepEsc(deepShown)}" alt="深入描述媒体">`;}const md=el.firstElementChild;const applyMedia=()=>{if(!md)return;const scale=Math.max(0.01,Number(c.scale)||1);md.style.width='auto';md.style.height='auto';md.style.left='50%';md.style.top='50%';const stretchX=Math.max(.85,Math.min(1.15,Number(c.stretchX)||1)),stretchY=Math.max(.85,Math.min(1.15,Number(c.stretchY)||1));md.style.transform=`translate(-50%,-50%) translate(${Number(c.offsetX)||0}px,${Number(c.offsetY)||0}px) scale(${scale}) scale(${stretchX},${stretchY})`;};if(md.complete)applyMedia();else md.addEventListener('load',applyMedia,{once:true});}}else if(item.type==='link'){const safeUrl=window.deepEsc(item.url||'');const safeLabel=window.deepEsc(item.label||item.url||'网址');el.innerHTML=`<div class="deep-link-inner"><span class="deep-link-icon"><i class="fa-solid fa-globe"></i></span><span class="deep-link-copy"><span class="deep-link-label">${safeLabel}</span><span class="deep-link-url">${safeUrl}</span></span><i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-slate-400"></i></div>`;el.title='双击编辑网址';}else if(item.type==='connector'){ el.remove(); return; }
-                st.appendChild(el);
+                else if(item.type==='media'){const c=item.crop||{scale:1,offsetX:0,offsetY:0,stretchX:1,stretchY:1};if(item.mediaKind==='video'){if(!reusedMedia){el.innerHTML='';window.deepRenderVideoCover(el,item,false);}}else{const deepAnimated=window.isAnimatedImageSource(item.src,item),deepShown=deepAnimated&&item.gifCover?item.gifCover:item.src;if(!reusedMedia||!el.firstElementChild||el.firstElementChild.getAttribute('src')!==deepShown){el.innerHTML=`<img src="${window.deepEsc(deepShown)}" alt="深入描述媒体">`;}const md=el.firstElementChild;const applyMedia=()=>{if(!md)return;const scale=Math.max(0.001,Number(c.scale)||1);md.style.width='auto';md.style.height='auto';md.style.left='50%';md.style.top='50%';const stretchX=Math.max(.85,Math.min(1.15,Number(c.stretchX)||1)),stretchY=Math.max(.85,Math.min(1.15,Number(c.stretchY)||1));md.style.transform=`translate(-50%,-50%) translate(${Number(c.offsetX)||0}px,${Number(c.offsetY)||0}px) scale(${scale}) scale(${stretchX},${stretchY})`;};if(md.complete)applyMedia();else md.addEventListener('load',applyMedia,{once:true});}}else if(item.type==='link'){const safeUrl=window.deepEsc(item.url||'');const safeLabel=window.deepEsc(item.label||item.url||'网址');el.innerHTML=`<div class="deep-link-inner"><span class="deep-link-icon"><i class="fa-solid fa-globe"></i></span><span class="deep-link-copy"><span class="deep-link-label">${safeLabel}</span><span class="deep-link-url">${safeUrl}</span></span><i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-slate-400"></i></div>`;el.title='双击编辑网址';}else if(item.type==='connector'){ el.remove(); return; }
+                if(!reusedMedia)st.appendChild(el);
                 el._deepBoundItem=item;el._deepMediaSignature=JSON.stringify([item.src,item.mediaKind,item.crop,item.cover,item.gifCover]);
                 if(!reusedMedia){window.deepBindItem(el,item); el.addEventListener('click',e=>{e.stopPropagation(); if(el._deepConnectPicked){el._deepConnectPicked=false;return;} if(window.deepConnectMode){window.deepHandleConnectPick(item);return;} window.deepCanvasSelected=item.id; window.deepRefreshSelectionVisual?.(); if(item.type==='text' && window.deepTextTool) window.renderDeepCanvas(false); else window.deepPositionTextTools?.();});
                 if(item.type==='media'){ el.addEventListener('dblclick',e=>{ e.preventDefault(); e.stopPropagation(); if(Date.now() < (el._deepSuppressCropUntil||0)) return; window.deepCanvasSelected=item.id; window.deepCropSelected(); }); }
@@ -10518,7 +10518,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                             <span id="deepCropVideoTimeLabel" class="w-24 text-right font-mono text-[10px] text-slate-500">0:00 / 0:00</span>
                             <button id="deepCropSetCover" type="button" class="px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100"><i class="fa-solid fa-image mr-1"></i>设为视频封面</button>
                         </div>`:''}
-                        <div class="deep-crop-scale-row flex items-center gap-3 text-xs"><span class="font-semibold shrink-0">内容缩放</span><input id="deepCropScale" type="range" min="0.01" max="20" step="0.01" class="flex-1 h-2 accent-indigo-600 cursor-pointer" /><input id="deepCropScaleNumber" type="number" min="1" max="2000" step="1" class="w-20 px-2 py-1 border rounded-md font-mono text-xs text-right" /><span id="deepCropScaleValue" class="w-14 text-right font-mono text-slate-600">100%</span></div><div class="deep-crop-actions flex justify-between gap-2 mt-4"><div class="flex gap-2"><button id="deepCropAutoFill" class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-semibold">自动填充</button><button id="deepCropUndoAutoFill" class="px-3 py-2 border border-slate-200 bg-white text-slate-500 rounded-lg text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed" disabled>取消填充</button></div><div class="flex gap-2"><button id="deepCropCancel" class="px-4 py-2 border rounded-lg text-sm">取消</button><button id="deepCropReset" class="px-4 py-2 border rounded-lg text-sm">恢复原图</button><button id="deepCropOk" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">确定</button></div></div>
+                        <div class="deep-crop-scale-row flex items-center gap-3 text-xs"><span class="font-semibold shrink-0">内容缩放</span><input id="deepCropScale" type="range" min="0.001" max="20" step="0.001" class="flex-1 h-2 accent-indigo-600 cursor-pointer" /><input id="deepCropScaleNumber" type="number" min="0.1" max="2000" step="0.1" class="w-20 px-2 py-1 border rounded-md font-mono text-xs text-right" /><span id="deepCropScaleValue" class="w-14 text-right font-mono text-slate-600">100%</span></div><div class="deep-crop-actions flex justify-between gap-2 mt-4"><div class="flex gap-2"><button id="deepCropAutoFill" class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-semibold">自动填充</button><button id="deepCropUndoAutoFill" class="px-3 py-2 border border-slate-200 bg-white text-slate-500 rounded-lg text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed" disabled>取消填充</button></div><div class="flex gap-2"><button id="deepCropCancel" class="px-4 py-2 border rounded-lg text-sm">取消</button><button id="deepCropReset" class="px-4 py-2 border rounded-lg text-sm">恢复原图</button><button id="deepCropOk" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">确定</button></div></div>
                     </div>
                 </div>`;
             const viewport=document.getElementById('deepCropViewport'),wrap=document.getElementById('deepCropPreviewWrap'),preview=document.getElementById('deepCropPreview');
@@ -10528,7 +10528,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             const cropBase={scale:crop.scale,offsetX:crop.offsetX,offsetY:crop.offsetY,stretchX:crop.stretchX,stretchY:crop.stretchY};
             let lastAutoFill=null;
             const undoAutoFillBtn=document.getElementById('deepCropUndoAutoFill');
-            const scaleInput=document.getElementById('deepCropScale'),scaleNumber=document.getElementById('deepCropScaleNumber'),scaleValue=document.getElementById('deepCropScaleValue');scaleInput.value=crop.scale.toFixed(2);if(scaleNumber)scaleNumber.value=String(Math.round(crop.scale*100));if(scaleValue)scaleValue.textContent=Math.round(crop.scale*100)+'%';
+            const scaleInput=document.getElementById('deepCropScale'),scaleNumber=document.getElementById('deepCropScaleNumber'),scaleValue=document.getElementById('deepCropScaleValue');scaleInput.value=crop.scale.toFixed(3);if(scaleNumber)scaleNumber.value=String(Number((crop.scale*100).toFixed(1)));if(scaleValue)scaleValue.textContent=Number((crop.scale*100).toFixed(1))+'%';
             const tag=it.mediaKind==='video'?'video':'img';preview.innerHTML=`<${tag} id="deepCropMedia" src="${window.deepEsc(it.src)}" ${tag==='video'?'muted playsinline preload="metadata" crossorigin="anonymous"':''} style="position:absolute;left:50%;top:50%;width:auto;height:auto;max-width:none;max-height:none;transform-origin:center center;user-select:none;pointer-events:none;will-change:transform;"></${tag}>`;
             const media=document.getElementById('deepCropMedia');let displayScale=1,raf=0,cropFrameReady=false,cropFrameLimit={minW:40,maxW:frame.w,minH:40,maxH:frame.h},cropResizeLocked=false,lockedDisplayScale=1,frameDragActive=false,lockedViewportHeight=0;
             const gifCoverBtn=document.getElementById('deepCropSetGifCover');
@@ -10622,12 +10622,12 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 preview.style.transformOrigin='top left';
                 preview.style.transform=`scale(${displayScale})`;
             };
-            const syncScaleUI=()=>{scaleInput.value=crop.scale.toFixed(2);if(scaleNumber)scaleNumber.value=String(Math.round(crop.scale*100));if(scaleValue)scaleValue.textContent=Math.round(crop.scale*100)+'%';};
-            const paint=()=>{raf=0;crop.scale=Math.max(.01,Math.min(20,Number(crop.scale)||1));syncScaleUI();media.style.transform=`translate(-50%,-50%) translate(${crop.offsetX}px,${crop.offsetY}px) scale(${crop.scale}) scale(${crop.stretchX||1},${crop.stretchY||1})`;};
-            const update=()=>{if(!raf)raf=requestAnimationFrame(paint);};scaleInput.oninput=()=>{crop.scale=Math.max(.01,Math.min(20,Number(scaleInput.value)||1));update();};if(scaleNumber){const applyNumber=()=>{crop.scale=Math.max(.01,Math.min(20,(Number(scaleNumber.value)||100)/100));update();};scaleNumber.onchange=applyNumber;scaleNumber.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();applyNumber();scaleNumber.blur();}};}preview.onwheel=e=>{e.preventDefault();crop.scale=Math.max(.01,Math.min(20,crop.scale+(e.deltaY<0?.02:-.02)));update();};
+            const syncScaleUI=()=>{scaleInput.value=crop.scale.toFixed(3);if(scaleNumber)scaleNumber.value=String(Number((crop.scale*100).toFixed(1)));if(scaleValue)scaleValue.textContent=Number((crop.scale*100).toFixed(1))+'%';};
+            const paint=()=>{raf=0;crop.scale=Math.max(.001,Math.min(20,Number(crop.scale)||1));syncScaleUI();media.style.transform=`translate(-50%,-50%) translate(${crop.offsetX}px,${crop.offsetY}px) scale(${crop.scale}) scale(${crop.stretchX||1},${crop.stretchY||1})`;};
+            const update=()=>{if(!raf)raf=requestAnimationFrame(paint);};scaleInput.oninput=()=>{crop.scale=Math.max(.001,Math.min(20,Number(scaleInput.value)||1));update();};if(scaleNumber){const applyNumber=()=>{crop.scale=Math.max(.001,Math.min(20,(Number(scaleNumber.value)||100)/100));update();};scaleNumber.onchange=applyNumber;scaleNumber.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();applyNumber();scaleNumber.blur();}};}preview.onwheel=e=>{e.preventDefault();crop.scale=Math.max(.001,Math.min(20,crop.scale+(e.deltaY<0?.02:-.02)));update();};
             let drag=null;preview.onpointerdown=e=>{e.preventDefault();drag={sx:e.clientX,sy:e.clientY,ox:crop.offsetX,oy:crop.offsetY,id:e.pointerId};preview.setPointerCapture?.(e.pointerId);preview.style.cursor='grabbing';};preview.onpointermove=e=>{if(!drag)return;e.preventDefault();crop.offsetX=drag.ox+(e.clientX-drag.sx)/Math.max(.001,displayScale);crop.offsetY=drag.oy+(e.clientY-drag.sy)/Math.max(.001,displayScale);update();};const endDrag=()=>{drag=null;preview.style.cursor='grab';};preview.onpointerup=endDrag;preview.onpointercancel=endDrag;preview.style.cursor='grab';preview.style.touchAction='none';
             window.bindMobileTransformGestures(preview,{
-                min:.01,max:20,onTakeover:()=>{drag=null;},
+                min:.001,max:20,onTakeover:()=>{drag=null;},
                 get:()=>{const r=preview.getBoundingClientRect();return {scale:crop.scale,x:r.width/2+crop.offsetX*displayScale,y:r.height/2+crop.offsetY*displayScale};},
                 apply:next=>{const r=preview.getBoundingClientRect();crop.scale=next.scale;crop.offsetX=(next.x-r.width/2)/Math.max(.001,displayScale);crop.offsetY=(next.y-r.height/2)/Math.max(.001,displayScale);update();}
             });
@@ -10706,10 +10706,10 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             };
             startCropFit();
             document.getElementById('deepCropReset').onclick=()=>{crop.scale=cropBase.scale;crop.offsetX=cropBase.offsetX;crop.offsetY=cropBase.offsetY;crop.stretchX=cropBase.stretchX;crop.stretchY=cropBase.stretchY;frame.w=frameBase.w;frame.h=frameBase.h;lastAutoFill=null;if(undoAutoFillBtn)undoAutoFillBtn.disabled=true;fitFrame();update();};
-            document.getElementById('deepCropAutoFill').onclick=()=>{const mw=tag==='video'?Number(media.videoWidth):Number(media.naturalWidth),mh=tag==='video'?Number(media.videoHeight):Number(media.naturalHeight);if(!(mw>0&&mh>0)){window.showToast('媒体尚未加载完成','info');return;}lastAutoFill={stretchX:Number(crop.stretchX)||1,stretchY:Number(crop.stretchY)||1};const baseScale=Math.max(.01,Number(crop.scale)||1),needW=Math.max(1,frame.w)+2*Math.abs(crop.offsetX),needH=Math.max(1,frame.h)+2*Math.abs(crop.offsetY);const needStretchX=needW/Math.max(1,mw*baseScale),needStretchY=needH/Math.max(1,mh*baseScale);crop.stretchX=Math.max(1,Math.min(1.15,needStretchX));crop.stretchY=Math.max(1,Math.min(1.15,needStretchY));if(undoAutoFillBtn)undoAutoFillBtn.disabled=false;update();};
+            document.getElementById('deepCropAutoFill').onclick=()=>{const mw=tag==='video'?Number(media.videoWidth):Number(media.naturalWidth),mh=tag==='video'?Number(media.videoHeight):Number(media.naturalHeight);if(!(mw>0&&mh>0)){window.showToast('媒体尚未加载完成','info');return;}lastAutoFill={stretchX:Number(crop.stretchX)||1,stretchY:Number(crop.stretchY)||1};const baseScale=Math.max(.001,Number(crop.scale)||1),needW=Math.max(1,frame.w)+2*Math.abs(crop.offsetX),needH=Math.max(1,frame.h)+2*Math.abs(crop.offsetY);const needStretchX=needW/Math.max(1,mw*baseScale),needStretchY=needH/Math.max(1,mh*baseScale);crop.stretchX=Math.max(1,Math.min(1.15,needStretchX));crop.stretchY=Math.max(1,Math.min(1.15,needStretchY));if(undoAutoFillBtn)undoAutoFillBtn.disabled=false;update();};
             if(undoAutoFillBtn)undoAutoFillBtn.onclick=()=>{if(!lastAutoFill)return;crop.stretchX=lastAutoFill.stretchX;crop.stretchY=lastAutoFill.stretchY;lastAutoFill=null;undoAutoFillBtn.disabled=true;update();};
             document.getElementById('deepCropCancel').onclick=()=>{try{if(tag==='video')media.pause();}catch(_){}m.classList.add('hidden');m._deepCropRO?.disconnect?.();};
-            document.getElementById('deepCropOk').onclick=()=>{deepPushUndo();it.w=Math.max(40,Math.round(frame.w));it.h=Math.max(40,Math.round(frame.h));it.crop={scale:Number(crop.scale.toFixed(2)),offsetX:Math.round(crop.offsetX),offsetY:Math.round(crop.offsetY),stretchX:Number((crop.stretchX||1).toFixed(3)),stretchY:Number((crop.stretchY||1).toFixed(3))};try{if(tag==='video')media.pause();}catch(_){}m.classList.add('hidden');m._deepCropRO?.disconnect?.();window.renderDeepCanvas();};m.classList.remove('hidden');
+            document.getElementById('deepCropOk').onclick=()=>{deepPushUndo();it.w=Math.max(40,Math.round(frame.w));it.h=Math.max(40,Math.round(frame.h));it.crop={scale:Number(crop.scale.toFixed(3)),offsetX:Math.round(crop.offsetX),offsetY:Math.round(crop.offsetY),stretchX:Number((crop.stretchX||1).toFixed(3)),stretchY:Number((crop.stretchY||1).toFixed(3))};try{if(tag==='video')media.pause();}catch(_){}m.classList.add('hidden');m._deepCropRO?.disconnect?.();window.renderDeepCanvas();};m.classList.remove('hidden');
         };
         window.closeDeepMediaPreview = function(){ const m=document.getElementById('deepMediaPreviewModal'); if(!m)return; m.querySelectorAll('video').forEach(video=>{try{video.pause();video.currentTime=0;}catch(_){}}); m.classList.add('hidden'); m.innerHTML=''; };
         window.openDeepMediaPreview = function(type,index,eventId,startTime=0){
@@ -10976,7 +10976,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                         if(deepGif&&deepCover){md.dataset.gifSrc=String(item.src||'');md.dataset.gifCover=deepCover;md.addEventListener('mouseenter',()=>window.gifPreviewPlay(md));md.addEventListener('mouseleave',()=>window.gifPreviewStop(md));} 
                         const applyMedia=()=>{
                             if(!md)return;
-                            const scale=Math.max(0.01,Number(c.scale)||1);
+                            const scale=Math.max(0.001,Number(c.scale)||1);
                             md.style.width='auto'; md.style.height='auto'; md.style.left='50%'; md.style.top='50%';
                             const stretchX=Math.max(.85,Math.min(1.15,Number(c.stretchX)||1)),stretchY=Math.max(.85,Math.min(1.15,Number(c.stretchY)||1));md.style.transform=`translate(-50%,-50%) translate(${Number(c.offsetX)||0}px,${Number(c.offsetY)||0}px) scale(${scale}) scale(${stretchX},${stretchY})`;
                         };
@@ -12569,7 +12569,6 @@ viewer.style.visibility='';
 
         window.openVideoCropModal = async function(index) {
             activeVideoCropIndex = index;
-            window.bindMobileVideoCoverGestures();
             const vidObj = window.editingVideos[index];
             if (!vidObj) return;
 
@@ -12718,7 +12717,7 @@ viewer.style.visibility='';
 
                 const canvas=document.createElement('canvas');
                 const maxSide=window.isPhoneLikeDevice?.()?960:1600;
-                const visible=window.videoCoverVisibleSourceRect(player);
+                const visible={x:0,y:0,w:capturePlayer.videoWidth,h:capturePlayer.videoHeight};
                 const scale=Math.min(1,maxSide/Math.max(visible.w,visible.h));
                 canvas.width=Math.max(1,Math.round(visible.w*scale));
                 canvas.height=Math.max(1,Math.round(visible.h*scale));
@@ -13263,21 +13262,21 @@ viewer.style.visibility='';
 
         window.installTouchMediaOrderButtons=function(container,type){
             if(!container||!window.isMobileEditingDevice?.())return;
-            container.querySelectorAll('.media-drag-item').forEach(item=>{
+            container.querySelectorAll('.media-drag-item,.link-row,[data-multi-drag][data-key="links"]').forEach(item=>{
                 if(item.querySelector('.touch-media-order'))return;
                 const controls=document.createElement('div');controls.className='touch-media-order';
                 [-1,1].forEach(direction=>{
-                    const button=document.createElement('button');button.type='button';button.textContent=direction<0?'←':'→';button.title=direction<0?'向前移动':'向后移动';button.setAttribute('aria-label',button.title);
+                    const button=document.createElement('button');button.type='button';const vertical=type==='video'||type==='link'||['videos','links'].includes(item.dataset.key);button.textContent=vertical?(direction<0?'↑':'↓'):(direction<0?'←':'→');button.title=vertical?(direction<0?'向上移动':'向下移动'):(direction<0?'向前移动':'向后移动');button.setAttribute('aria-label',button.title);
                     button.addEventListener('pointerdown',e=>e.stopPropagation());
                     button.onclick=e=>{
                         e.preventDefault();e.stopPropagation();if(!window.canEditNow?.()||(Number(window._cloudWriteLockDepth)||0)>0)return;
                         const multi=item.hasAttribute('data-multi-drag');
                         if(multi)window.multiPersistCurrentPage?.();
-                        const arr=multi?window.multiTimeDraft?.[Number(item.dataset.seg)]?.[item.dataset.key]:(type==='image'?window.editingImageFiles:window.editingVideos);
-                        const from=Number(multi?item.dataset.index:item.dataset.mediaIndex),to=from+direction;
+                        const arr=multi?window.multiTimeDraft?.[Number(item.dataset.seg)]?.[item.dataset.key]:(type==='image'?window.editingImageFiles:type==='link'?window.editingLinks:window.editingVideos);
+                        const from=Number(multi?item.dataset.index:(type==='link'?item.dataset.linkIndex:item.dataset.mediaIndex)),to=from+direction;
                         if(!Array.isArray(arr)||from<0||from>=arr.length||to<0||to>=arr.length)return;
                         [arr[from],arr[to]]=[arr[to],arr[from]];
-                        if(multi)window.multiRenderCurrentPage();else if(type==='image')window.renderMicroPreviews();else window.renderVideoPreviews();
+                        if(multi)window.multiRenderCurrentPage();else if(type==='image')window.renderMicroPreviews();else if(type==='link')window.renderLinkPreviews();else window.renderVideoPreviews();
                     };
                     controls.appendChild(button);
                 });item.appendChild(controls);
@@ -13396,7 +13395,7 @@ viewer.style.visibility='';
                     ${locked ? '' : `<button type="button" onclick="event.stopPropagation();openEditLinkModal(${idx})" class="text-slate-400 hover:text-indigo-600 shrink-0 p-1" title="编辑"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="event.stopPropagation();removeWebLink(${idx})" class="text-rose-500 hover:text-rose-700 shrink-0 p-1" title="删除"><i class="fa-solid fa-xmark"></i></button>`}
                 </div>
             `).join('');
-            if (!locked) window.initLinkDragDrop(container);
+            if (!locked){window.installTouchMediaOrderButtons(container,'link');window.initLinkDragDrop(container);}
         };
 
         window._linkDragFrom = null;
@@ -13688,6 +13687,15 @@ viewer.style.visibility='';
             viewer._detailGifSequenceCleanup=()=>{disposed=true;paused=true;playToken++;stopTimer();removeLayer();viewer._detailGifSequenceCleanup=null;};
             playCurrent();
         };
+        window.switchGifCoverToCrop=async function(button,onCrop,close){
+            if(button.disabled)return;
+            button.disabled=true;
+            try{
+                const opened=await onCrop?.();
+                if(opened!==false&&opened!==undefined)close();
+            }catch(error){window.showToast?.('截选画面打开失败，请重试','error');}
+            finally{button.disabled=false;}
+        };
         window.openGifCoverPicker=async function(src,cloudPath,coverCloudPath,onSaved,onCrop,fileID,crop=null,options={}){
             window.beginEditMediaTxn?.();
             src=String(src||''); if(!src)return;
@@ -13711,7 +13719,7 @@ viewer.style.visibility='';
             const drawFrame=async(index)=>{if(!decoder||closed)return;index=Math.max(0,Math.min(frameCount-1,Number(index)||0));current=index;range.value=String(index);const serial=++decodeSerial;try{const r=await decoder.decode({frameIndex:index});if(closed||serial!==decodeSerial){r.image?.close?.();return;}const vf=r.image;canvas.width=vf.displayWidth||vf.codedWidth;canvas.height=vf.displayHeight||vf.codedHeight;ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(vf,0,0,canvas.width,canvas.height);vf.close?.();img.classList.add('hidden');canvas.classList.remove('hidden');timeEl.textContent=`${fmt(starts[index]||0)} / ${fmt(totalUs)}`;frameEl.textContent=`第 ${index+1} / ${frameCount} 帧`;}catch(e){console.warn('GIF frame decode failed',e);}};
             const scheduleNext=()=>{if(!playing||closed)return;const delay=Math.max(20,Math.round((durations[current]||100000)/1000));playTimer=setTimeout(async()=>{if(!playing||closed)return;await drawFrame((current+1)%frameCount);scheduleNext();},delay);};
             modal.onclick=e=>{if(e.target===modal)close();};modal.querySelector('[data-gif-cover-close]').onclick=close;modal.querySelector('[data-gif-cover-cancel]').onclick=close;
-            modal.querySelector('[data-gif-crop]')?.addEventListener('click',()=>{close();onCrop?.();});
+            modal.querySelector('[data-gif-crop]')?.addEventListener('click',event=>window.switchGifCoverToCrop(event.currentTarget,onCrop,close));
             img.crossOrigin='anonymous';img.src=src;
             try{
                 if(!('ImageDecoder' in window))throw new Error('暂不支持逐帧处理此动图');
@@ -13765,7 +13773,7 @@ viewer.style.visibility='';
             modal.querySelector('[data-gif-cover-save]').onclick=async()=>{const btn=modal.querySelector('[data-gif-cover-save]');btn.disabled=true;btn.textContent='正在保存…';try{let source=canvas.classList.contains('hidden')?img:canvas,w=source===img?img.naturalWidth:canvas.width,h=source===img?img.naturalHeight:canvas.height;if(!w||!h)throw new Error('动图尚未加载完成');const validCrop=crop&&Number(crop.sw)>0&&Number(crop.sh)>0;
                 let sx=0,sy=0,sw=w,sh=h;
                 if(crop?.mode==='deep'){
-                    const sc=Math.max(.01,Number(crop.scale)||1),stx=Math.max(.01,Number(crop.stretchX)||1),sty=Math.max(.01,Number(crop.stretchY)||1);
+                    const sc=Math.max(.001,Number(crop.scale)||1),stx=Math.max(.01,Number(crop.stretchX)||1),sty=Math.max(.01,Number(crop.stretchY)||1);
                     const fw=Math.max(1,Number(crop.frameW)||w),fh=Math.max(1,Number(crop.frameH)||h);
                     sw=Math.min(w,fw/(sc*stx));sh=Math.min(h,fh/(sc*sty));
                     sx=Math.max(0,Math.min(w-sw,w/2-(fw/2+(Number(crop.offsetX)||0))/(sc*stx)));
@@ -13891,7 +13899,7 @@ viewer.style.visibility='';
                 const cw = container.clientWidth;
                 const ch = container.clientHeight;
                 const fit = Math.min(cw / cropState.naturalWidth, ch / cropState.naturalHeight) * 0.92;
-                cropState.scale = Math.max(0.15, Math.min(4, fit));
+                cropState.scale = Math.max(0.001, Math.min(20, fit));
                 const dispW = cropState.naturalWidth * cropState.scale;
                 const dispH = cropState.naturalHeight * cropState.scale;
                 cropState.imgX = (cw - dispW) / 2;
@@ -13905,6 +13913,7 @@ viewer.style.visibility='';
 
             targetImg.onload = setup;
             if (targetImg.complete && targetImg.naturalWidth) setup();
+            return true;
         };
 
         function applyCropUI() {
@@ -13928,11 +13937,11 @@ viewer.style.visibility='';
             if (label) label.innerText = Math.round(cropState.boxW) + ' × ' + Math.round(cropState.boxH);
 
             if (slider) slider.value = cropState.scale;
-            if (sliderText) sliderText.innerText = Math.round(cropState.scale * 100) + '%';
+            if (sliderText) sliderText.innerText = Number((cropState.scale * 100).toFixed(1)) + '%';
         }
 
         window.handleImageScaleChange = function(val) {
-            const newScale = Math.max(0.15, Math.min(4, parseFloat(val) || 1));
+            const newScale = Math.max(0.001, Math.min(20, parseFloat(val) || 1));
             const oldScale = cropState.scale || 1;
             if (Math.abs(newScale - oldScale) < 1e-6) return;
 
@@ -13960,7 +13969,7 @@ viewer.style.visibility='';
 
             container.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                const delta = e.deltaY > 0 ? -0.04 : 0.04;
+                const delta = e.deltaY > 0 ? -0.02 : 0.02;
                 window.handleImageScaleChange(cropState.scale + delta);
             }, { passive: false });
 
@@ -14031,7 +14040,7 @@ viewer.style.visibility='';
             };
 
             window.bindMobileTransformGestures(container,{
-                min:.15,max:4,onTakeover:()=>{mode=null;handle=null;},
+                min:.001,max:20,onTakeover:()=>{mode=null;handle=null;},
                 get:()=>({scale:cropState.scale||1,x:cropState.imgX,y:cropState.imgY}),
                 apply:next=>{cropState.scale=next.scale;cropState.imgX=next.x;cropState.imgY=next.y;applyCropUI();}
             });
