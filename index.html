@@ -1882,6 +1882,30 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 .timeline-filter-date-row>label{font-size:12px;color:#64748b;flex-shrink:0;padding-top:10px}
 @media(max-width:639px){.timeline-search-tools{width:100%;flex:0 1 auto}.timeline-search-box input{width:100%;min-width:0}#tagModalShell{padding:20px 16px}.timeline-filter-date-row{flex-direction:column;gap:5px}.timeline-filter-date-row>label{padding-top:0}}
 </style>
+<style>
+.filter-section-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.filter-section-heading h4{font-size:12px;font-weight:700;color:#334155}
+.filter-section-heading button{font-size:11px;color:#64748b;border:1px solid #e2e8f0;border-radius:8px;padding:4px 8px;background:#fff;white-space:nowrap}
+.filter-section-heading button:hover{background:#f8fafc}
+.filter-date-values{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:#4f46e5;font-variant-numeric:tabular-nums}
+.filter-date-value-divider{color:#94a3b8;font-size:11px}
+.filter-dual-range{height:42px;position:relative;margin:0 10px}
+.filter-range-track{position:absolute;left:0;right:0;top:19px;height:4px;border-radius:8px;background:#e2e8f0;pointer-events:none}
+#timelineDateRangeFill{height:100%;position:absolute;background:#6366f1;border-radius:8px}
+.filter-dual-range input[type=range]{position:absolute;width:calc(100% + 20px);left:-10px;top:0;height:40px;margin:0;background:transparent;appearance:none;-webkit-appearance:none;pointer-events:none;outline:none}
+.filter-dual-range input::-webkit-slider-runnable-track{height:4px;background:transparent}
+.filter-dual-range input::-moz-range-track{height:4px;background:transparent}
+.filter-dual-range input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;border:2px solid #6366f1;box-shadow:0 1px 4px #0002;margin-top:-8px;pointer-events:auto;cursor:grab}
+.filter-dual-range input::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid #6366f1;box-shadow:0 1px 4px #0002;pointer-events:auto;cursor:grab}
+#timelineDateStartSlider{z-index:2;transform:translateY(-3px)}
+#timelineDateEndSlider{z-index:3;transform:translateY(3px)}
+.filter-dual-range input:focus-visible::-webkit-slider-thumb{outline:3px solid #c7d2fe;outline-offset:2px}
+.filter-dual-range input:focus-visible::-moz-range-thumb{outline:3px solid #c7d2fe;outline-offset:2px}
+.filter-dual-range input:disabled::-webkit-slider-thumb{border-color:#cbd5e1;cursor:default}
+.filter-date-expand{display:flex;align-items:center;gap:6px;font-size:11px;color:#64748b;padding:4px 0}
+.filter-date-expand i{font-size:9px;transition:transform .15s}
+#timelineDatePreciseFields[hidden]{display:none}
+</style>
 </head>
 <!-- v35: head-motion branch from v32 -->
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
@@ -2079,6 +2103,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 </button>
             </div>
             <div id="tagListSection" class="mb-3">
+                <div class="filter-section-heading"><h4>Tag筛选</h4><button type="button" onclick="clearTimelineTagDraft()">清除Tag筛选</button></div>
                 <div id="tagFilterControls" class="mb-3">
                     <div class="text-xs font-bold text-slate-700 mb-2">筛选模式</div>
                     <div class="flex items-center gap-5 flex-wrap">
@@ -2091,7 +2116,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                             <button type="button" id="tagMatchAllBtn" onclick="setTagFilterDraftMatch('all')" class="px-3 py-1 rounded-md text-[11px] font-medium">全部</button>
                         </div>
                     </div>
-                    <p id="tagFilterHint" class="mt-2 text-[10px] leading-4 text-slate-400"></p>
                 </div>
             <div id="tagInputContainer" class="mb-3">
                 <label class="block text-xs font-bold text-slate-700 mb-2">新增Tag</label>
@@ -2104,14 +2128,22 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 
 
             <section class="timeline-date-filter">
-                <h4 class="text-xs font-bold text-slate-700 mb-2">日期范围</h4>
-                <div class="timeline-filter-date-row"><label>开始日期</label><div id="timelineFilterStartFields"></div></div>
-                <div class="timeline-filter-date-row"><label>结束日期</label><div id="timelineFilterEndFields"></div></div>
+                <div class="filter-section-heading"><h4>日期范围</h4><button type="button" onclick="clearTimelineDateDraft()">清除日期筛选</button></div>
+                <div class="filter-date-values"><span id="timelineDateStartLabel">不限</span><span class="filter-date-value-divider">至</span><span id="timelineDateEndLabel">不限</span></div>
+                <div id="timelineDateSlider" class="filter-dual-range">
+                    <div class="filter-range-track"><div id="timelineDateRangeFill"></div></div>
+                    <input id="timelineDateStartSlider" type="range" min="0" max="1" step="1" value="0" aria-label="开始日期" oninput="changeTimelineDateSlider('start',this.value)">
+                    <input id="timelineDateEndSlider" type="range" min="0" max="1" step="1" value="1" aria-label="结束日期" oninput="changeTimelineDateSlider('end',this.value)">
+                </div>
+                <button id="timelineDateExpandBtn" type="button" aria-expanded="false" aria-controls="timelineDatePreciseFields" class="filter-date-expand" onclick="toggleTimelineDatePrecise()"><span>精确输入</span><i class="fa-solid fa-chevron-down"></i></button>
+                <div id="timelineDatePreciseFields" hidden>
+                    <div class="timeline-filter-date-row"><label>开始日期</label><div id="timelineFilterStartFields"></div></div>
+                    <div class="timeline-filter-date-row"><label>结束日期</label><div id="timelineFilterEndFields"></div></div>
+                </div>
                 <p id="timelineFilterDateError" role="alert" class="hidden text-xs text-rose-500 mt-2"></p>
             </section>
 
-            <div id="tagFilterFooter" class="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
-                <button type="button" onclick="clearTagFilter()" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50">清除筛选</button>
+            <div id="tagFilterFooter" class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
                 <div class="flex gap-2">
                     <button type="button" onclick="closeTagModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-200 text-slate-600 hover:bg-slate-50">取消</button>
                     <button type="button" onclick="applyTagFilter()" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">确定筛选</button>
@@ -5608,9 +5640,9 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             return window.timelineEventDateIntervals(event).some(interval=>(!start||window.compareTimelineDateBounds(interval.end,start)>=0)&&(!end||window.compareTimelineDateBounds(interval.start,end)<=0));
         };
         window.renderTimelineFilterDateFields=function(){
-            const dates=window.timelineDateFilter||{};
+            const dates=window.timelineDateDraft||{};
             for(const [key,id] of [['start','timelineFilterStart'],['end','timelineFilterEnd']]){
-                const container=document.getElementById(id+'Fields');if(container)container.innerHTML=window.inlineDateFieldsHtml(id,dates[key]||'','');
+                const container=document.getElementById(id+'Fields');if(container)container.innerHTML=window.inlineDateFieldsHtml(id,dates[key]||'','window.syncTimelineDateDraftFromInputs()');
             }
             document.getElementById('timelineFilterDateError')?.classList.add('hidden');
         };
@@ -5630,6 +5662,75 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             hint?.classList.add('hidden');return dates;
         };
 
+        // Gregorian day numbers avoid timezone shifts and support partial historic dates.
+        window.timelineDateToDay=function(tuple){
+            const [year,month,day]=tuple,previous=year-1;
+            let value=previous*365+Math.floor(previous/4)-Math.floor(previous/100)+Math.floor(previous/400);
+            const leap=year%4===0&&(year%100!==0||year%400===0),days=[31,leap?29:28,31,30,31,30,31,31,30,31,30,31];
+            for(let i=1;i<month;i++)value+=days[i-1];value+=day-1;
+            return Number.isSafeInteger(value)?value:null;
+        };
+        window.timelineDayToDate=function(value){
+            if(!Number.isSafeInteger(value)||value<0)return '';
+            let low=1,high=Math.floor(value/365)+2;
+            while(low+1<high){const mid=low+Math.floor((high-low)/2);if(window.timelineDateToDay([mid,1,1])<=value)low=mid;else high=mid;}
+            let month=1,rest=value-window.timelineDateToDay([low,1,1]);
+            const leap=low%4===0&&(low%100!==0||low%400===0),days=[31,leap?29:28,31,30,31,30,31,31,30,31,30,31];
+            while(month<12&&rest>=days[month-1]){rest-=days[month-1];month++;}
+            return `${String(low).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(rest+1).padStart(2,'0')}`;
+        };
+        window.timelineDateDraftDays=function(dates){
+            const first=dates.start?window.timelineDateBounds(dates.start):null,last=dates.end?window.timelineDateBounds(dates.end):null;
+            return {start:first?window.timelineDateToDay(first.start):null,end:last?window.timelineDateToDay(last.end):null};
+        };
+        window.timelineDateBaseDomain=function(){
+            let min=null,max=null;
+            for(const event of window.events||[])for(const interval of window.timelineEventDateIntervals(event)){
+                const start=window.timelineDateToDay(interval.start),end=window.timelineDateToDay(interval.end);
+                if(start===null||end===null)continue;
+                min=min===null?start:Math.min(min,start);max=max===null?end:Math.max(max,end);
+            }
+            if(min===null){const year=new Date().getFullYear();min=window.timelineDateToDay([year,1,1]);max=window.timelineDateToDay([year,12,31]);}
+            if(min===max){min=Math.max(0,min-1);max++;}
+            return {min,max};
+        };
+        window.updateTimelineDateSlider=function(){
+            const dates=window.timelineDateDraft||{start:'',end:''},bounds=window.timelineDateDraftDays(dates);
+            const domain=window.timelineDateSliderDomain||window.timelineDateBaseDomain();
+            for(const value of [bounds.start,bounds.end])if(value!==null){domain.min=Math.min(domain.min,value);domain.max=Math.max(domain.max,value);}
+            window.timelineDateSliderDomain=domain;
+            const start=bounds.start??domain.min,end=bounds.end??domain.max;
+            const unsupported=!!((dates.start&&bounds.start===null)||(dates.end&&bounds.end===null));
+            for(const [key,value] of [['start',start],['end',end]]){
+                const slider=document.getElementById(key==='start'?'timelineDateStartSlider':'timelineDateEndSlider');if(!slider)continue;
+                slider.min=domain.min;slider.max=domain.max;slider.value=value;slider.disabled=unsupported;
+                slider.setAttribute('aria-valuetext',dates[key]||'不限');
+            }
+            const startLabel=document.getElementById('timelineDateStartLabel'),endLabel=document.getElementById('timelineDateEndLabel');
+            if(startLabel)startLabel.textContent=dates.start||'不限';if(endLabel)endLabel.textContent=dates.end||'不限';
+            const fill=document.getElementById('timelineDateRangeFill'),span=Math.max(1,domain.max-domain.min);
+            if(fill){fill.style.left=(start-domain.min)/span*100+'%';fill.style.width=Math.max(0,end-start)/span*100+'%';}
+        };
+        window.changeTimelineDateSlider=function(side,raw){
+            const domain=window.timelineDateSliderDomain||window.timelineDateBaseDomain(),draft=window.timelineDateDraft||{start:'',end:''};
+            const bounds=window.timelineDateDraftDays(draft),start=bounds.start??domain.min,end=bounds.end??domain.max;
+            let value=Math.round(Number(raw));if(!Number.isSafeInteger(value))return;
+            value=Math.max(domain.min,Math.min(domain.max,value));
+            const selected=side==='start'?Math.min(value,end):Math.max(value,start);
+            window.timelineDateDraft={start:side==='start'?window.timelineDayToDate(selected):(draft.start||window.timelineDayToDate(start)),end:side==='end'?window.timelineDayToDate(selected):(draft.end||window.timelineDayToDate(end))};
+            window.renderTimelineFilterDateFields();window.updateTimelineDateSlider();
+        };
+        window.syncTimelineDateDraftFromInputs=function(){
+            if(window._timelineDateInputSyncing)return;
+            window._timelineDateInputSyncing=true;
+            try{const dates=window.readTimelineFilterDates();if(dates){window.timelineDateDraft=dates;window.updateTimelineDateSlider();}}
+            finally{window._timelineDateInputSyncing=false;}
+        };
+        window.toggleTimelineDatePrecise=function(){
+            const fields=document.getElementById('timelineDatePreciseFields'),button=document.getElementById('timelineDateExpandBtn');if(!fields||!button)return;
+            fields.hidden=!fields.hidden;button.setAttribute('aria-expanded',String(!fields.hidden));button.querySelector('i')?.classList.toggle('rotate-180',!fields.hidden);
+        };
+
         window.openTagModal = function() {
             window.tagManageCategory='all';
             document.getElementById('tagManageCategoryMenu')?.classList.add('hidden');
@@ -5640,7 +5741,11 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             if (inputContainer) {
                 inputContainer.style.display = window.isLocked ? 'none' : 'block';
             }
-            window.renderTimelineFilterDateFields();
+            window.timelineDateDraft={...(window.timelineDateFilter||{start:'',end:''})};
+            window.timelineDateSliderDomain=null;
+            window.renderTimelineFilterDateFields();window.updateTimelineDateSlider();
+            const precise=document.getElementById('timelineDatePreciseFields');if(precise)precise.hidden=true;
+            const expand=document.getElementById('timelineDateExpandBtn');if(expand){expand.setAttribute('aria-expanded','false');expand.querySelector('i')?.classList.remove('rotate-180');}
             window.tagFilterDraftMode = window.tagFilterMode || 'include';
             window.tagFilterDraftMatch = window.tagFilterMatch || 'any';
             window.tagFilterDraftSelected = Array.isArray(window.tagFilterSelected) ? window.tagFilterSelected.slice() : [];
@@ -5667,7 +5772,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             const exc=document.getElementById('tagModeExcludeBtn');
             if(inc) inc.className=`px-3 py-1 rounded-md text-[11px] font-medium ${window.tagFilterDraftMode==='include'?active:idle}`;
             if(exc) exc.className=`px-3 py-1 rounded-md text-[11px] font-medium ${window.tagFilterDraftMode==='exclude'?active:idle}`;
-            window.updateTagFilterHint();
             window.renderTagModalList();
         };
 
@@ -5679,13 +5783,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             const allBtn=document.getElementById('tagMatchAllBtn');
             if(anyBtn) anyBtn.className=`px-3 py-1 rounded-md text-[11px] font-medium ${window.tagFilterDraftMatch==='any'?active:idle}`;
             if(allBtn) allBtn.className=`px-3 py-1 rounded-md text-[11px] font-medium ${window.tagFilterDraftMatch==='all'?active:idle}`;
-            window.updateTagFilterHint();
-        };
-
-        window.updateTagFilterHint = function() {
-            const hint = document.getElementById('tagFilterHint');
-            if (!hint) return;
-            hint.textContent = '请选择需要筛选的Tag，可多选';
         };
 
         window.toggleTagDraft = function(tag) {
@@ -5713,12 +5810,6 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 if (tc) tc.scrollLeft = 0;
                 window.scrollTimelineToFirstNode();
             }));
-            const n = window.tagFilterSelected.length;
-            if (n === 0 && !dates.start && !dates.end) {
-                window.showToast('已清除筛选', 'info');
-            } else {
-                window.showToast('已筛选成功', 'success');
-            }
             window.updateTagFilterBadge();
         };
 
@@ -6149,23 +6240,13 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             if (container.scrollLeft < 0) container.scrollLeft = 0;
         };
 
-        window.clearTagFilter = function() {
-            window.timelineDateFilter={start:'',end:''};
-            window.renderTimelineFilterDateFields();
-            window.activeTagFilter = null;
-            window.tagFilterSelected = [];
-            window.tagFilterDraftSelected = [];
-            window.tagFilterMode = 'include';
-            window.tagFilterDraftMode = 'include';
-            window.tagFilterMatch = 'any';
-            window.tagFilterDraftMatch = 'any';
-            window.updateTagFilterBadge();
-            window.renderTagModalList();
-            const timelineContainer = document.getElementById('timelineContainer');
-            if (timelineContainer) timelineContainer.scrollLeft = 0;
-            window.renderEvents();
-            requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTimelineToFirstNode()));
-            window.showToast('已清除筛选', 'info');
+        window.clearTimelineTagDraft=function(){
+            window.tagFilterDraftSelected=[];
+            window.setTagFilterDraftMode('include');window.setTagFilterDraftMatch('any');
+        };
+        window.clearTimelineDateDraft=function(){
+            window.timelineDateDraft={start:'',end:''};window.timelineDateSliderDomain=null;
+            window.renderTimelineFilterDateFields();window.updateTimelineDateSlider();
         };
 
         window.scrollTimeline = function(amount) {
