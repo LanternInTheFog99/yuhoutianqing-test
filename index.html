@@ -1907,6 +1907,42 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 #timelineDatePreciseFields[hidden]{display:none}
 #timelineDatePreciseFields:disabled input{background:#f8fafc;color:#94a3b8;cursor:not-allowed}
 </style>
+<style>@media(max-width:639px){
+ #deepDescriptionModal .deep-editor-header{height:auto;min-height:48px;flex-wrap:wrap;gap:6px;padding:8px 10px}
+ #deepDescriptionModal .deep-editor-heading{flex:1 1 100%;margin-right:0;font-size:13px;white-space:nowrap;min-width:0}
+ #deepDescriptionModal .deep-editor-heading #deepEditorTitle{overflow:hidden;text-overflow:ellipsis;min-width:0}
+ #deepDescriptionModal .deep-editor-header>button{flex:0 0 auto;white-space:nowrap;padding:6px 9px;font-size:11px;line-height:1.4}
+ #deepDescriptionModal .deep-editor-header>span:empty{display:none}
+ #deepDescriptionModal .deep-canvas-toolbar{padding:7px 10px;gap:6px;max-height:40dvh;overflow-y:auto;overscroll-behavior:contain}
+ #deepDescriptionModal .deep-canvas-toolbar>button,#deepDescriptionModal .deep-canvas-toolbar>.relative,#deepDescriptionModal .deep-canvas-toolbar>label{flex:0 0 auto;white-space:nowrap}
+ #deepDescriptionModal .deep-canvas-toolbar button,#deepDescriptionModal #deepTextTools label{white-space:nowrap;word-break:normal;flex-shrink:0}
+ #deepDescriptionModal .deep-backup-status{margin-left:0;flex:1 0 100%;width:max-content;padding:5px 8px}
+ #deepDescriptionModal #deepTextTools{max-width:100%;flex-wrap:wrap;gap:6px}
+ #deepDescriptionModal #deepTextTools select{max-width:100%}
+ #deepDescriptionModal #deepDrawPanel,#deepDescriptionModal #deepTextColorPalette,#deepDescriptionModal #deepBorderColorPalette{position:fixed;left:12px;right:auto;top:150px;max-width:calc(100vw - 24px);max-height:50dvh;overflow-y:auto;z-index:430;transform:none}
+ #deepDescriptionModal .deep-canvas-stage{margin-left:0;margin-right:0}
+ #deepCropModal button,#cropModal button,#videoCropModal button,#deepVideoCoverModal button,#deepVideoPreviewModal button,#editModal [data-deep-edit-btn],#multiTimeEventModal [data-deep-edit-btn],#editModal .video-edit-card button,#multiTimeEventModal .video-edit-card button{white-space:nowrap;word-break:normal;flex-shrink:0;line-height:1.4}
+ #deepCropModal .deep-crop-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+ #deepCropModal .deep-crop-actions>div{display:flex;flex-wrap:wrap;gap:6px;max-width:100%}
+ #deepCropModal .deep-crop-scale-row{gap:6px}
+ #deepCropModal #deepCropScale{min-width:40px;flex:1 1 60px}
+ #deepCropModal #deepCropScaleValue{width:36px}
+ #deepCropModal .deep-crop-actions button{padding:7px 9px;font-size:11px;flex:0 0 auto}
+ #deepCropModal #deepCropVideoCoverControls,#deepCropModal #deepCropGifCoverControls{flex-wrap:wrap;gap:6px}
+ #deepCropModal #deepCropVideoTime{flex:1 1 100px;min-width:70px}
+ #deepCropModal #deepCropVideoTimeLabel{width:auto;white-space:nowrap}
+ #deepCropModal #deepCropSetCover{padding:6px 8px;font-size:11px}
+ #deepCropModal #deepCropScaleNumber{width:54px}
+ #cropModal .crop-actions,#videoCropModal .video-cover-actions{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px}
+ #cropModal .crop-actions>span,#videoCropModal .video-cover-actions>span{flex:1 0 100%;text-align:left}
+ #cropModal .crop-actions button,#videoCropModal .video-cover-actions button{font-size:11px;padding:7px 9px}
+ #editModal .media-image-actions,#multiTimeEventModal .media-image-actions{flex-direction:row;gap:3px}
+ #editModal [data-image-crop],#editModal [data-image-edit],#editModal [data-image-remove],#editModal [data-image-deep],#multiTimeEventModal .media-image-actions button{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;padding:0!important;flex:0 0 24px!important;border-radius:7px}
+ #editModal .video-edit-card,#multiTimeEventModal .video-edit-card{flex-wrap:wrap;gap:6px;padding:8px}
+ #editModal .video-edit-card button,#multiTimeEventModal .video-edit-card button{font-size:10px;padding:5px 7px}
+ #editModal .video-edit-card [data-mobile-order],#multiTimeEventModal .video-edit-card [data-mobile-order]{flex-shrink:0}
+}
+</style>
 </head>
 <!-- v35: head-motion branch from v32 -->
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
@@ -2311,7 +2347,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 <span id="imageScaleText" class="text-xs font-mono text-indigo-400 w-12 text-right">100%</span>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-between items-center w-full mt-4 pt-3 border-t border-slate-800 gap-2">
+            <div class="crop-actions flex flex-col sm:flex-row justify-between items-center w-full mt-4 pt-3 border-t border-slate-800 gap-2">
                 <span></span>
                 <div class="flex gap-2 w-full sm:w-auto justify-end">
                     <button onclick="closeCropModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-medium">取消</button>
@@ -2337,7 +2373,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 <video id="videoCropPlayer" controls playsinline webkit-playsinline crossorigin="anonymous" class="max-h-60 w-full object-contain bg-black"></video>
             </div>
 
-            <div class="flex justify-between items-center w-full pt-3 border-t border-slate-800">
+            <div class="video-cover-actions flex justify-between items-center w-full pt-3 border-t border-slate-800">
                 <span class="text-[11px] text-slate-400">当前画面将作为视频封面</span>
                 <div class="flex gap-2">
                     <button onclick="closeVideoCropModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-medium">取消</button>
@@ -5479,11 +5515,9 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
         window.multiOpenVideoCropModal=function(seg,index){if(!window.multiActivateSharedSegment(seg))return;window.openVideoCropModal(index);};
         window.multiOpenVideoEdit=function(seg,index){if(!window.multiActivateSharedSegment(seg))return;window.openVideoEditModal(index);};
         window.multiOpenLinkEdit=function(seg,index){if(!window.multiActivateSharedSegment(seg))return;window.openEditLinkModal(index);};
-        window.multiOpenDeepDescriptionEditor=function(segIndex,type,index){
+        window.multiOpenDeepDescriptionEditor=async function(segIndex,type,index){
             if(!window.multiActivateSharedSegment(segIndex))return;
-            window.openDeepDescriptionEditor(type,index);
-            if(window.deepCanvasTarget)window.deepCanvasTarget={multi:true,segIndex,type,index};
-            if(window._deepEditSession)window._deepEditSession.target={multi:true,segIndex,type,index};
+            return await window.openDeepDescriptionEditor(type,index,{multi:true,segIndex,type,index});
         };
 
         // Shared save/crop callbacks refresh the active multi-time page only when invoked through the adapter.
@@ -7836,13 +7870,99 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             const src=window.deepGetSrc(type,obj);
             return {version:3,width:2600,height:1600,items:[{id:'seed_'+Date.now().toString(36),type:'media',x:160,y:120,w:520,h:340,src:src,mediaKind:type==='video'?'video':'image',cloudPath:String(obj?.cloudPath||''),layer:0,seed:true}],sourceType:type,source:src};
         };
+        window.bindMobileTransformGestures=function(host,options){
+            if(!host)return;
+            window._mobileTransformHosts=window._mobileTransformHosts||new Map();
+            if(host.id){const previous=window._mobileTransformHosts.get(host.id);if(previous&&previous!==host)previous._mobileTransformCleanup?.();}
+            host._mobileTransformCleanup?.();
+            if(host.id)window._mobileTransformHosts.set(host.id,host);
+            const points=new Map();let gesture=null,suppressUntil=0,takingOver=false;
+            const touch=e=>e.pointerType==='touch';
+            const local=e=>{const r=host.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top,id:e.pointerId,target:e.target};};
+            const pair=()=>{const p=[...points.values()].slice(0,2);return {x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2,d:Math.max(1,Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y))};};
+            const consume=e=>{e.preventDefault();e.stopImmediatePropagation();};
+            const takeover=()=>{takingOver=true;try{options.onTakeover?.();for(const p of points.values()){
+                try{p.target?.dispatchEvent(new PointerEvent('pointercancel',{bubbles:true,pointerId:p.id,pointerType:'touch'}));p.target?.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:p.id,pointerType:'touch'}));}catch(_){}
+                try{host.setPointerCapture(p.id);}catch(_){}
+            }options.onTakeoverComplete?.();}finally{takingOver=false;}};
+            const beginPinch=()=>{const mid=pair(),state=options.get();gesture={mode:'pinch',mid,state,anchorX:(mid.x-state.x)/state.scale,anchorY:(mid.y-state.y)/state.scale};};
+            const down=e=>{
+                if(!touch(e))return;if(!points.size)options.onTouchStart?.();points.set(e.pointerId,local(e));
+                if(points.size>=2){takeover();beginPinch();suppressUntil=Date.now()+500;consume(e);return;}
+                if(options.canPan?.(e)){gesture={mode:'pan',first:local(e),state:options.get()};if(options.consumePanDown!==false){try{host.setPointerCapture(e.pointerId);}catch(_){}consume(e);}}
+            };
+            const move=e=>{
+                if(!touch(e)||!points.has(e.pointerId))return;points.set(e.pointerId,{...local(e),target:points.get(e.pointerId).target});if(!gesture)return;
+                if(points.size>=2){if(gesture.mode!=='pinch')beginPinch();const mid=pair();
+                    const scale=Math.max(options.min??.5,Math.min(options.max??4,gesture.state.scale*mid.d/gesture.mid.d));
+                    options.apply({scale,x:mid.x-gesture.anchorX*scale,y:mid.y-gesture.anchorY*scale});
+                }else{
+                    const p=local(e),dx=p.x-gesture.first.x,dy=p.y-gesture.first.y;
+                    if(options.consumePanDown===false&&Math.hypot(dx,dy)<4)return;
+                    try{host.setPointerCapture(e.pointerId);}catch(_){}
+                    options.apply({...gesture.state,x:gesture.state.x+dx,y:gesture.state.y+dy});
+                }
+                suppressUntil=Date.now()+500;consume(e);
+            };
+            const end=e=>{
+                if(takingOver||!touch(e)||!points.has(e.pointerId))return;
+                const active=!!gesture;points.delete(e.pointerId);
+                if(active&&points.size>=2)beginPinch();
+                else if(active&&points.size===1){const p=[...points.values()][0];gesture={mode:'pan',first:p,state:options.get()};}
+                else if(!points.size)gesture=null;
+                try{host.releasePointerCapture(e.pointerId);}catch(_){}
+                if(active&&Date.now()<suppressUntil)consume(e);
+            };
+            const click=e=>{if(Date.now()<suppressUntil)consume(e);};
+            const clear=()=>{for(const id of points.keys()){try{host.releasePointerCapture(id);}catch(_){}}points.clear();gesture=null;};
+            for(const [type,fn] of [['pointerdown',down],['pointermove',move],['pointerup',end],['pointercancel',end],['click',click]])host.addEventListener(type,fn,{capture:true,passive:false});
+            window.addEventListener('blur',clear);window.addEventListener('pointerup',end);window.addEventListener('pointercancel',end);host.style.touchAction='none';
+            host._mobileTransformCleanup=()=>{for(const [type,fn] of [['pointerdown',down],['pointermove',move],['pointerup',end],['pointercancel',end],['click',click]])host.removeEventListener(type,fn,true);window.removeEventListener('blur',clear);window.removeEventListener('pointerup',end);window.removeEventListener('pointercancel',end);clear();};
+        };
+        window.bindDeepMobileCanvasGestures=function(){
+            const stage=document.getElementById('deepCanvasStage'),host=stage?.parentElement;if(!host)return;host.id='deepCanvasViewport';
+            let drawBefore=null;
+            window.bindMobileTransformGestures(host,{
+                min:.5,max:2.5,
+                onTouchStart:()=>{drawBefore=window.deepDrawToolsActive?{state:window.deepClone(window.deepCanvasState),undo:window.deepCanvasUndo.length,redo:window.deepClone(window.deepCanvasRedo),selected:window.deepCanvasSelected,drawSelection:[...(window.deepDrawSelection||[])],lasso:window.deepClone(window.deepDrawSelectionLasso||[])}:null;},
+                onTakeoverComplete:()=>{
+                    if(!drawBefore)return;
+                    const current=new Map(window.deepCanvasState.items.map(item=>[item.id,item]));
+                    const state=window.deepClone(drawBefore.state);state.items=state.items.map(item=>item.type!=='draw'&&current.has(item.id)?current.get(item.id):item);
+                    window.deepCanvasState=state;window.deepCanvasUndo.length=drawBefore.undo;window.deepCanvasRedo=drawBefore.redo;
+                    window.deepCanvasSelected=drawBefore.selected;window.deepDrawSelection=drawBefore.drawSelection;window.deepDrawSelectionLasso=drawBefore.lasso;window.deepDrawLassoPoints=[];
+                    window.renderDeepCanvas();drawBefore=null;
+                },
+                get:()=>{const a=stage.getBoundingClientRect(),b=host.getBoundingClientRect();return {scale:window.deepZoom||1,x:a.left-b.left,y:a.top-b.top};},
+                apply:next=>{window.deepSetZoom(next.scale);const a=stage.getBoundingClientRect(),b=host.getBoundingClientRect();host.scrollLeft+=a.left-b.left-next.x;host.scrollTop+=a.top-b.top-next.y;},
+                canPan:e=>!window.deepDrawToolsActive&&!window.deepTextTool&&!e.target.closest?.('.deep-canvas-item,.deep-canvas-handle,.deep-layer-controls,.deep-video-controls'),
+            });
+        };
+        window.bindMobileVideoCoverGestures=function(){
+            const player=document.getElementById('videoCropPlayer'),host=player?.parentElement;if(!host)return;host.id='videoCropViewport';
+            window.videoCoverPreviewTransform={scale:1,x:0,y:0};player.style.transform='';
+            window.bindMobileTransformGestures(host,{
+                min:1,max:4,consumePanDown:false,canPan:e=>e.clientY<player.getBoundingClientRect().bottom-36,
+                get:()=>{const t=window.videoCoverPreviewTransform,r=host.getBoundingClientRect();return {scale:t.scale,x:r.width/2+t.x,y:r.height/2+t.y};},
+                apply:next=>{const r=host.getBoundingClientRect();const base=Math.min(player.clientWidth/Math.max(1,player.videoWidth),player.clientHeight/Math.max(1,player.videoHeight));const mx=Math.max(0,(player.videoWidth*base*next.scale-r.width)/2),my=Math.max(0,(player.videoHeight*base*next.scale-r.height)/2);window.videoCoverPreviewTransform={scale:next.scale,x:Math.max(-mx,Math.min(mx,next.x-r.width/2)),y:Math.max(-my,Math.min(my,next.y-r.height/2))};player.style.transform=`translate(${window.videoCoverPreviewTransform.x}px,${window.videoCoverPreviewTransform.y}px) scale(${next.scale})`;player.style.transformOrigin='center';}
+            });
+        };
+        window.videoCoverVisibleSourceRect=function(player){
+            const t=window.videoCoverPreviewTransform;if(!t||t.scale===1&&t.x===0&&t.y===0)return {x:0,y:0,w:player.videoWidth,h:player.videoHeight};
+            const r=player.parentElement.getBoundingClientRect(),base=Math.min(player.clientWidth/player.videoWidth,player.clientHeight/player.videoHeight),scale=base*t.scale;
+            if(!(scale>0))return {x:0,y:0,w:player.videoWidth,h:player.videoHeight};
+            const left=(r.width-player.videoWidth*scale)/2+t.x,top=(r.height-player.videoHeight*scale)/2+t.y;
+            const x=Math.max(0,Math.min(player.videoWidth-1,-left/scale)),y=Math.max(0,Math.min(player.videoHeight-1,-top/scale));
+            return {x,y,w:Math.max(1,Math.min(player.videoWidth-x,(r.width-Math.max(0,left))/scale)),h:Math.max(1,Math.min(player.videoHeight-y,(r.height-Math.max(0,top))/scale))};
+        };
+
         window.deepEnsureModal = function(){
             let m=document.getElementById('deepDescriptionModal'); if(m)return m;
             m=document.createElement('div'); m.id='deepDescriptionModal';
             m.className='fixed inset-0 z-[300] hidden bg-slate-950/80 backdrop-blur-sm p-0 text-slate-800';
             m.innerHTML=`<div class="w-full h-full bg-white flex flex-col">
-                <div class="h-14 shrink-0 border-b border-slate-200 flex items-center gap-2 px-3 sm:px-5 bg-white">
-                    <div class="font-bold text-sm sm:text-base flex items-center gap-2 mr-auto min-w-0"><i class="fa-solid fa-feather-pointed text-violet-600"></i><span id="deepEditorTitle">深入描述</span><button type="button" onclick="deepOpenHelp()" class="ml-1 px-2.5 py-1.5 border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-semibold whitespace-nowrap" title="深入描述使用说明"><i class="fa-solid fa-circle-question mr-1"></i>使用说明</button></div>
+                <div class="deep-editor-header h-14 shrink-0 border-b border-slate-200 flex items-center gap-2 px-3 sm:px-5 bg-white">
+                    <div class="deep-editor-heading font-bold text-sm sm:text-base flex items-center gap-2 mr-auto min-w-0"><i class="fa-solid fa-feather-pointed text-violet-600"></i><span id="deepEditorTitle">深入描述</span><button type="button" onclick="deepOpenHelp()" class="ml-1 px-2.5 py-1.5 border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-semibold whitespace-nowrap" title="深入描述使用说明"><i class="fa-solid fa-circle-question mr-1"></i>使用说明</button></div>
                     <span id="deepEnabledStatus" class="whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] leading-4 font-semibold bg-white shadow-sm"></span>
                     <button type="button" id="deepEnableToggleBtn" onclick="deepToggleDescriptionEnabled()" class="px-3 py-1.5 border rounded-lg text-xs"><i data-deep-enable-toggle-icon class="fa-solid fa-eye-slash mr-1"></i><span data-deep-enable-toggle-label>停用</span></button>
                     <span class="w-1.5 sm:w-3"></span>
@@ -7873,17 +7993,17 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                     </div>
                     <label class="text-[10px] text-slate-500 flex items-center gap-1">字号<select id="deepFontSize" style="width:82px;min-width:82px" disabled data-deep-text-control data-deep-selection-only onpointerdown="deepRememberTextSelection(event)" onchange="deepSetFontSizeControl(this.value)" class="deep-selection-text-control h-7 border rounded-md bg-white"><option value="10">10px</option><option value="12">12px</option><option value="14">14px</option><option value="16">16px</option><option value="18" selected>18px（默认）</option><option value="20">20px</option><option value="24">24px</option><option value="28">28px</option><option value="32">32px</option><option value="36">36px</option><option value="40">40px</option><option value="48">48px</option><option value="56">56px</option><option value="64">64px</option><option value="72">72px</option></select><span id="deepCustomSizeGroup" class="inline-flex items-center gap-1 shrink-0"><input id="deepFontSizeCustom" disabled data-deep-text-control data-deep-selection-only type="number" min="6" max="240" step="0.1" value="18" class="deep-selection-text-control h-7 w-12 border rounded-md bg-white px-1.5 font-mono text-[10px]" title="实际字号，可输入任意数值" oninput="deepPreviewFontSizeControl(this.value)" onchange="deepCommitFontSizeControl(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"><span class="font-mono text-[10px] text-slate-400">px</span></span></label>
                     <div class="deep-text-style-group" role="group" aria-label="文字样式">
-                        <button id="deepBoldBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="deepRememberTextSelection(event)" onclick="deepApplyTextStyle('bold')" class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs font-bold">B</button>
-                        <button id="deepItalicBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="deepRememberTextSelection(event)" onclick="deepApplyTextStyle('italic')" class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs italic">I</button>
-                        <button id="deepUnderlineBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="deepRememberTextSelection(event)" onclick="deepApplyTextStyle('underline')" class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs underline">U</button>
-                        <button id="deepStrikeBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="deepRememberTextSelection(event)" onclick="deepApplyTextStyle('strike')" class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs line-through">S</button>
+                        <button id="deepBoldBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="event.preventDefault();deepRememberTextSelection()" onclick="deepApplyTextStyle('bold')" class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs font-bold">B</button>
+                        <button id="deepItalicBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="event.preventDefault();deepRememberTextSelection()" onclick="deepApplyTextStyle('italic')" class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs italic">I</button>
+                        <button id="deepUnderlineBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="event.preventDefault();deepRememberTextSelection()" onclick="deepApplyTextStyle('underline')" class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs underline">U</button>
+                        <button id="deepStrikeBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="event.preventDefault();deepRememberTextSelection()" onclick="deepApplyTextStyle('strike')" class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs line-through">S</button>
                     </div>
                     <div class="deep-text-align-group" role="group" aria-label="文字对齐">
                         <button id="deepAlignLeftBtn" type="button" disabled data-deep-text-control data-deep-selection-only class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs" title="左对齐" onclick="deepApplyTextStyle('align','left')"><i class="fa-solid fa-align-left"></i></button>
                         <button id="deepAlignCenterBtn" type="button" disabled data-deep-text-control data-deep-selection-only class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs" title="居中" onclick="deepApplyTextStyle('align','center')"><i class="fa-solid fa-align-center"></i></button>
                         <button id="deepAlignRightBtn" type="button" disabled data-deep-text-control data-deep-selection-only class="deep-selection-text-control px-2 py-1 bg-white border rounded text-xs" title="右对齐" onclick="deepApplyTextStyle('align','right')"><i class="fa-solid fa-align-right"></i></button>
                     </div>
-                    <div class="relative"><button id="deepTextColorBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="deepRememberTextSelection(event)" onclick="deepOpenColorPalette('text')" class="deep-selection-text-control px-2.5 py-1.5 bg-white border rounded-lg text-xs"><span id="deepTextColorSwatch" class="inline-block w-3 h-3 rounded-full mr-1 align-[-1px]" style="background:#334155"></span>文字颜色</button><div id="deepTextColorPalette" class="hidden absolute left-0 top-9 z-[260] w-64 p-3 bg-white border border-slate-200 rounded-xl shadow-xl"><div class="text-[10px] font-semibold text-slate-500 mb-2">固定色 / 自定义</div><div class="grid grid-cols-7 gap-2">${['#0f172a','#334155','#64748b','#dc2626','#ea580c','#f59e0b','#16a34a','#059669','#0284c7','#2563eb','#4f46e5','#7c3aed','#db2777','#ffffff'].map(c=>`<button type="button" onclick="deepPickColor('text','${c}')" class="w-6 h-6 rounded-full border border-slate-200 deep-color-choice" style="background:${c}" title="${c}"></button>`).join('')}</div><div class="flex items-center gap-2 mt-3 pt-2 border-t"><span class="text-[10px] text-slate-500">自定义</span><input id="deepTextCustomColor" type="color" value="#334155" onchange="deepPickColor('text',this.value)" class="w-7 h-7 p-0 border-0"><button type="button" onclick="deepPickColor('text',document.getElementById('deepTextCustomColor').value)" class="ml-auto px-2 py-1 rounded bg-indigo-600 text-white text-[10px]">使用</button></div></div></div>
+                    <div class="relative"><button id="deepTextColorBtn" type="button" disabled data-deep-text-control data-deep-selection-only onpointerdown="event.preventDefault();deepRememberTextSelection()" onclick="deepOpenColorPalette('text')" class="deep-selection-text-control px-2.5 py-1.5 bg-white border rounded-lg text-xs"><span id="deepTextColorSwatch" class="inline-block w-3 h-3 rounded-full mr-1 align-[-1px]" style="background:#334155"></span>文字颜色</button><div id="deepTextColorPalette" class="hidden absolute left-0 top-9 z-[260] w-64 p-3 bg-white border border-slate-200 rounded-xl shadow-xl"><div class="text-[10px] font-semibold text-slate-500 mb-2">固定色 / 自定义</div><div class="grid grid-cols-7 gap-2">${['#0f172a','#334155','#64748b','#dc2626','#ea580c','#f59e0b','#16a34a','#059669','#0284c7','#2563eb','#4f46e5','#7c3aed','#db2777','#ffffff'].map(c=>`<button type="button" onclick="deepPickColor('text','${c}')" class="w-6 h-6 rounded-full border border-slate-200 deep-color-choice" style="background:${c}" title="${c}"></button>`).join('')}</div><div class="flex items-center gap-2 mt-3 pt-2 border-t"><span class="text-[10px] text-slate-500">自定义</span><input id="deepTextCustomColor" type="color" value="#334155" onchange="deepPickColor('text',this.value)" class="w-7 h-7 p-0 border-0"><button type="button" onclick="deepPickColor('text',document.getElementById('deepTextCustomColor').value)" class="ml-auto px-2 py-1 rounded bg-indigo-600 text-white text-[10px]">使用</button></div></div></div>
                     <label class="text-[10px] text-slate-500 flex items-center gap-1">透明度<input id="deepTextOpacity" data-deep-text-control data-deep-selection-only type="range" min="0" max="100" value="100" disabled oninput="deepApplyTextStyle('opacity',this.value)" class="deep-selection-text-control w-16"><span id="deepTextOpacityValue" class="w-5 text-right font-mono text-slate-400">—</span></label>
                     </div>
                     <button type="button" onclick="deepDeleteSelected()" class="px-2.5 py-1.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-lg text-xs">删除选中</button>
@@ -7893,6 +8013,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             </div>`;
             document.body.appendChild(m);
             m.addEventListener('wheel',window.deepHandleWheel,{passive:false});
+            window.bindDeepMobileCanvasGestures();
             return m;
         };
         if(!window._deepGlobalUndoBound){
@@ -7938,20 +8059,24 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             if(!src||!cp)return {src,cloudPath:cp};
             try{const r=await fetch(src,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const blob=await r.blob();let base=(cp.split('/').pop()||'media').replace(/\.[^.]+$/,'');const ext=(cp.split('/').pop()||'').match(/(\.[^.]+)$/)?.[1]||'';base=base.replace(/_[a-z0-9]+_[a-f0-9]{8}$/i,'').replace(/_[a-f0-9]{8}$/i,'');const name=base+'_desc'+ext;const file=new File([blob],name,{type:blob.type||obj?.mime||'application/octet-stream'});const up=await window.uploadLargeMediaToCloudBase(file,{purpose:type==='video'?'video':(obj?.isAnimated?'gif':'picture')});return {src:up.url,cloudPath:up.cloudPath};}catch(e){console.warn('深入描述默认媒体副本创建失败，回退原媒体',e);return {src,cloudPath:cp};}
         };
-        window.openDeepDescriptionEditor = async function(type,index){
-            const obj=window.deepMediaObject(type,index); if(!obj)return;
+        window.openDeepDescriptionEditor = async function(type,index,targetOverride=null){
+            const target=targetOverride||{type,index};
+            const obj=window.deepResolveTargetObject(target); if(!obj)return;
+            const openEpoch=window._deepOpenEpoch=(Number(window._deepOpenEpoch)||0)+1;
             const m=window.deepEnsureModal();
-            window.deepCanvasTarget={type,index};
+            window.deepCanvasTarget={...target};
             window.beginEditMediaTxn?.();
             window._deepEditSession={
-                target:{type,index},
+                target:{...target},
                 originalDeep:window.deepClone(obj.deepDescription),
                 originalEnabled:window.deepDescriptionIsEnabled(obj.deepDescription),
                 tempMark:window.getTempUploadMark?.()||0
             };
             const existingDraft=window.getDeepDraftSnapshot?.(window.deepCanvasTarget)||window.deepClone(obj.deepDescription);
-            if(existingDraft) window.deepCanvasState=existingDraft;
-            else { const seed=await window.deepCreateSeedCopy(type,obj); window.deepCanvasState=window.deepDefaultState(type,obj); const seedItem=window.deepCanvasState.items?.[0]; if(seedItem){seedItem.src=seed.src;seedItem.cloudPath=seed.cloudPath;seedItem.seedCopy=true;} }
+            let nextState=existingDraft;
+            if(!nextState){const seed=await window.deepCreateSeedCopy(type,obj);nextState=window.deepDefaultState(type,obj);const seedItem=nextState.items?.[0];if(seedItem){seedItem.src=seed.src;seedItem.cloudPath=seed.cloudPath;seedItem.seedCopy=true;}}
+            if(openEpoch!==window._deepOpenEpoch)return;
+            window.deepCanvasState=nextState;
             window.deepCanvasState.items=(window.deepCanvasState.items||[]).map(x=>{if(x&&['media','text','link'].includes(x.type)){const n=Number(x.layer);x.layer=Number.isFinite(n)?Math.max(-1,n):0;}return x;});
             window.deepCanvasState.items=(window.deepCanvasState.items||[]).filter(x=>x.type!=='arrow');
             window.deepCanvasState.items.forEach(x=>{if(x.type==='connector'){x.curve=Number(x.curve)||0;x.direction=x.direction||'forward';if(x.type==='text'&&!x._lastTextColor)x._lastTextColor=x.color||'#334155';}});
@@ -7961,17 +8086,22 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             window.deepDescriptionEnabledDraft=enabled;
             window.deepSyncEnabledToggle?.();
             m.classList.remove('hidden'); window.deepSetTextToolsExpanded?.(false); window.deepSetDrawing(false); window.deepSetErasing(false); window.deepUpdateConnectorControls?.(); window.renderDeepCanvas();
+            let restoredBackup=null;
             try{
-                const backupKey=window.deepBackupKey(window.deepCanvasTarget),backup=await window.deepBackupGet?.(backupKey);
+                const backupKey=window.deepBackupKey(target),backup=await window.deepBackupGetForTarget?.(target);
+                if(openEpoch!==window._deepOpenEpoch||m.classList.contains('hidden'))return;
                 if(backup?.state){
                     const use=await window.deepAppConfirm({title:'检测到未保存的深入描述备份',desc:'发现上次意外退出前留下的自动备份。是否恢复这份备份？',confirmText:'恢复备份'});
-                    if(use){window.deepCanvasState=window.deepClone(backup.state);window.deepDescriptionEnabledDraft=backup.enabled!==false;window.deepSyncEnabledToggle?.();window.renderDeepCanvas();window._deepBackupLastAt=Number(backup.updatedAt)||Date.now();}
+                    if(openEpoch!==window._deepOpenEpoch||m.classList.contains('hidden'))return;
+                    if(use&&window.deepRestoreBackup(backup,openEpoch))restoredBackup=backup;
                     else await window.deepBackupDelete?.(backupKey);
                 }
             }catch(err){console.warn('读取深入描述自动备份失败',err);}
-            window.deepStartAutosave?.();
+            if(openEpoch!==window._deepOpenEpoch||m.classList.contains('hidden'))return;
+            window.deepStartAutosave?.(restoredBackup);
         };
         window.closeDeepDescriptionEditor = async function(discard){
+            window._deepOpenEpoch=(Number(window._deepOpenEpoch)||0)+1;
             window.deepStopAutosave?.();
             const m=document.getElementById('deepDescriptionModal');
             if(discard&&window._deepEditSession){
@@ -8066,14 +8196,43 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             const mediaId=String(obj?.mediaId||obj?.cloudPath||window.deepGetSrc?.(target?.type,obj)||'');
             const eventId=String(target?.multi?window.multiTimeEditingId:window.editingEventId||'new');
             const segId=target?.multi?String(window.multiTimeDraft?.[target.segIndex]?.id||target.segIndex):'single';
-            return ['deep',eventId,segId,String(target?.type||''),mediaId].join('::');
+            return ['deep',encodeURIComponent(window.currentRoomId||'default'),encodeURIComponent(window.getCurrentAccountId?.()||'guest'),eventId,segId,String(target?.type||''),mediaId].join('::');
         };
+        window.deepBackupGetForTarget=async function(target){
+            const key=window.deepBackupKey(target),current=await window.deepBackupGet(key);if(current)return current;
+            const object=window.deepResolveTargetObject?.(target);
+            const markedTest=window.currentRoomId===window.TEST_ROOM_ID&&/(?:^|\/)yht_test_[^/]+/.test(String(object?.cloudPath||''));
+            if(window.currentRoomId!==window.MAIN_EDIT_ROOM_ID&&!markedTest)return null;
+            const legacyKey=key.split('::').filter((_,i)=>i!==1&&i!==2).join('::');
+            const legacy=await window.deepBackupGet(legacyKey);if(!legacy)return null;
+            if(legacy.roomId&&legacy.roomId!==window.currentRoomId)return null;
+            if(legacy.accountId&&legacy.accountId!==(window.getCurrentAccountId?.()||'guest'))return null;
+            const migrated={...legacy,key,roomId:window.currentRoomId,accountId:window.getCurrentAccountId?.()||'guest'};
+            await window.deepBackupPut(migrated);await window.deepBackupDelete(legacyKey);return migrated;
+        };
+        window.deepRestoreBackup=function(backup,epoch=window._deepOpenEpoch){
+            if(!backup?.state||!Array.isArray(backup.state.items)||epoch!==window._deepOpenEpoch)return false;
+            const state=window.deepClone(backup.state);state.width=Math.max(800,Number(state.width)||2600);state.height=Math.max(600,Number(state.height)||1600);
+            state.items=state.items.filter(x=>x&&x.type!=='arrow').map(item=>{delete item._manualResizing;delete item._curveUndo;if(item.type==='text')item.editing=false;return item;});
+            window.deepCanvasState=state;window.deepCanvasSelected=null;window.deepSavedTextSelectionSnapshot=null;window.deepSavedTextRange=null;
+            window.deepDescriptionEnabledDraft=backup.enabled!==false;window.deepSyncEnabledToggle?.();window.renderDeepCanvas();
+            requestAnimationFrame(()=>{
+                if(epoch!==window._deepOpenEpoch)return;
+                const stage=document.getElementById('deepCanvasStage'),viewport=stage?.parentElement;if(!viewport)return;
+                window.deepSetZoom(backup.view?.zoom||1);
+                const first=state.items.find(x=>['media','text','link'].includes(x.type));
+                viewport.scrollLeft=backup.view?Math.max(0,Number(backup.view.scrollLeft)||0):Math.max(0,(Number(first?.x)||0)*(window.deepZoom||1)-20);
+                viewport.scrollTop=backup.view?Math.max(0,Number(backup.view.scrollTop)||0):Math.max(0,(Number(first?.y)||0)*(window.deepZoom||1)-20);
+            });
+            return true;
+        };
+
         window.deepBackupPut=async function(record){const db=await window.deepBackupDbOpen();return new Promise((resolve,reject)=>{const tx=db.transaction('backups','readwrite');tx.objectStore('backups').put(record);tx.oncomplete=()=>resolve(true);tx.onerror=()=>reject(tx.error);});};
         window.deepBackupGet=async function(key){const db=await window.deepBackupDbOpen();return new Promise((resolve,reject)=>{const req=db.transaction('backups','readonly').objectStore('backups').get(key);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});};
         window.deepBackupDelete=async function(key){if(!key)return;try{const db=await window.deepBackupDbOpen();await new Promise((resolve,reject)=>{const tx=db.transaction('backups','readwrite');tx.objectStore('backups').delete(key);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}catch(_){}};
         window.deepBackupDeleteForEvent=async function(eventId){
             if(eventId===null||eventId===undefined)return;
-            try{const db=await window.deepBackupDbOpen();const prefix='deep::'+String(eventId)+'::';await new Promise((resolve,reject)=>{const tx=db.transaction('backups','readwrite'),store=tx.objectStore('backups'),req=store.openCursor();req.onsuccess=()=>{const c=req.result;if(!c)return;if(String(c.key).startsWith(prefix))c.delete();c.continue();};tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}catch(_){}
+            try{const db=await window.deepBackupDbOpen();const prefix=['deep',encodeURIComponent(window.currentRoomId||'default'),encodeURIComponent(window.getCurrentAccountId?.()||'guest'),String(eventId),''].join('::'),legacyPrefix='deep::'+String(eventId)+'::';await new Promise((resolve,reject)=>{const tx=db.transaction('backups','readwrite'),store=tx.objectStore('backups'),req=store.openCursor();req.onsuccess=()=>{const c=req.result;if(!c)return;if(String(c.key).startsWith(prefix)||(window.currentRoomId===window.MAIN_EDIT_ROOM_ID&&String(c.key).startsWith(legacyPrefix)))c.delete();c.continue();};tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}catch(_){}
         };
         window.deepBackupSetStatus=function(kind,at){
             const el=document.getElementById('deepBackupStatus');if(!el)return;
@@ -8091,22 +8250,22 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
         };
         window.deepBackupNow=async function(force=false){
             const modal=document.getElementById('deepDescriptionModal');if(!modal||modal.classList.contains('hidden')||!window.deepCanvasState||!window.deepCanvasTarget)return false;
-            const key=window.deepBackupKey();const payload={state:window.deepClone(window.deepCanvasState),enabled:!!window.deepDescriptionEnabledDraft};
+            const key=window.deepBackupKey();const viewport=document.getElementById('deepCanvasStage')?.parentElement;const payload={state:window.deepClone(window.deepCanvasState),enabled:!!window.deepDescriptionEnabledDraft,view:{zoom:window.deepZoom||1,scrollLeft:viewport?.scrollLeft||0,scrollTop:viewport?.scrollTop||0}};
             const fingerprint=JSON.stringify(payload);if(!force&&fingerprint===window._deepBackupFingerprint)return false;
             window.deepBackupSetStatus('saving');
-            try{const at=Date.now();await window.deepBackupPut({key,eventId:String(window.deepCanvasTarget?.multi?window.multiTimeEditingId:window.editingEventId||'new'),updatedAt:at,...payload});window._deepBackupFingerprint=fingerprint;window.deepBackupSetStatus('saved',at);return true;}
+            try{const at=Date.now();await window.deepBackupPut({key,roomId:window.currentRoomId||'default',accountId:window.getCurrentAccountId?.()||'guest',eventId:String(window.deepCanvasTarget?.multi?window.multiTimeEditingId:window.editingEventId||'new'),updatedAt:at,...payload});window._deepBackupFingerprint=fingerprint;window.deepBackupSetStatus('saved',at);return true;}
             catch(err){console.warn('深入描述自动备份失败',err);window.deepBackupSetStatus('error');return false;}
         };
         window.deepScheduleBackup=function(){
             if(window._deepBackupDebounce)clearTimeout(window._deepBackupDebounce);
             window._deepBackupDebounce=setTimeout(()=>window.deepBackupNow?.(),2500);
         };
-        window.deepStartAutosave=function(){
-            window.deepStopAutosave?.();window._deepBackupFingerprint='';window._deepBackupLastAt=0;window.deepBackupSetStatus?.('waiting');
+        window.deepStartAutosave=function(restored=null){
+            window.deepStopAutosave?.();window._deepBackupFingerprint='';window._deepBackupLastAt=Number(restored?.updatedAt)||0;
+            if(window._deepBackupLastAt)window.deepBackupRefreshStatus?.();else window.deepBackupSetStatus?.('waiting');
             const modal=document.getElementById('deepDescriptionModal');
             window._deepBackupInputHandler=()=>window.deepScheduleBackup?.();
-            modal?.addEventListener('input',window._deepBackupInputHandler,true);
-            modal?.addEventListener('change',window._deepBackupInputHandler,true);
+            ['input','change','pointerup','click'].forEach(type=>modal?.addEventListener(type,window._deepBackupInputHandler,true));
             window.deepAutosaveTimer=setInterval(()=>window.deepBackupNow?.(),60*1000);
             window._deepBackupStatusTimer=setInterval(()=>window.deepBackupRefreshStatus?.(),30*1000);
         };
@@ -8114,7 +8273,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             if(window.deepAutosaveTimer){clearInterval(window.deepAutosaveTimer);window.deepAutosaveTimer=null;}
             if(window._deepBackupStatusTimer){clearInterval(window._deepBackupStatusTimer);window._deepBackupStatusTimer=null;}
             if(window._deepBackupDebounce){clearTimeout(window._deepBackupDebounce);window._deepBackupDebounce=null;}
-            const modal=document.getElementById('deepDescriptionModal');if(window._deepBackupInputHandler){modal?.removeEventListener('input',window._deepBackupInputHandler,true);modal?.removeEventListener('change',window._deepBackupInputHandler,true);window._deepBackupInputHandler=null;}
+            const modal=document.getElementById('deepDescriptionModal');if(window._deepBackupInputHandler){['input','change','pointerup','click'].forEach(type=>modal?.removeEventListener(type,window._deepBackupInputHandler,true));window._deepBackupInputHandler=null;}
         };
         window.saveDeepDescriptionEditor=async function(){
             const target=window.deepCanvasTarget;if(!target)return;
@@ -9151,6 +9310,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
         };
         window.deepClearSavedSelectionHighlight=function(){try{CSS?.highlights?.delete?.('deep-saved-selection');}catch(_){}};
         window.deepRememberTextSelection=function(e){
+            if(window._deepSelectionRestoring)return !!window.deepSavedTextSelectionSnapshot;
             if(e?.target?.closest?.('#deepTextTools'))return !!window.deepSavedTextSelectionSnapshot;
             if(window.deepCaptureTextSelectionSnapshot?.()){
                 const it=window.deepCanvasState?.items?.find(x=>x.id===window.deepCanvasSelected);
@@ -9184,7 +9344,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
         };
         if(!window._deepOpacitySelectionBound){
             window._deepOpacitySelectionBound=true;
-            const sync=()=>{if(!window.deepTextTool)return;if(document.activeElement?.closest?.('#deepTextTools'))return;requestAnimationFrame(()=>{if(document.activeElement?.closest?.('#deepTextTools'))return;window.deepRememberTextSelection?.();});};
+            const sync=()=>{if(!window.deepTextTool||window._deepSelectionRestoring)return;if(document.activeElement?.closest?.('#deepTextTools'))return;requestAnimationFrame(()=>{if(document.activeElement?.closest?.('#deepTextTools'))return;window.deepRememberTextSelection?.();});};
             document.addEventListener('selectionchange',sync);
             document.addEventListener('pointerup',e=>{if(e.target?.closest?.('.deep-text-content'))sync();},true);
             document.addEventListener('keyup',e=>{if(e.target?.closest?.('.deep-text-content'))sync();},true);
@@ -10048,6 +10208,15 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
 
         window.renderDeepCanvas=function(rebuild=true){
             const st=document.getElementById('deepCanvasStage'); if(!st||!window.deepCanvasState)return;
+            const textFocused=!!document.activeElement?.closest?.('.deep-text-content');
+            const selectionEpoch=rebuild?(window._deepSelectionRestoreEpoch=(Number(window._deepSelectionRestoreEpoch)||0)+1):window._deepSelectionRestoreEpoch;
+            let selectionBefore=null;
+            if(rebuild&&window.deepTextTool){
+                window.deepCaptureTextSelectionSnapshot?.();
+                const snap=window.deepSavedTextSelectionSnapshot;
+                if(snap?.itemId===window.deepCanvasSelected&&window.deepCanvasState.items.some(x=>x.id===snap.itemId&&x.type==='text'))selectionBefore=window.deepClone(snap);
+            }
+            if(rebuild)window._deepSelectionRestoring=!!selectionBefore;
             st.classList.toggle('deep-text-mode-active',!!window.deepTextTool); st.classList.toggle('deep-draw-interaction-lock',!!window.deepDrawToolsActive);
             window.deepUpdateTextToolControls?.();
             window.deepSyncOpacityControl?.();
@@ -10056,7 +10225,8 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 st.querySelectorAll('.deep-canvas-media[data-deep-id]').forEach(node=>{
                     const id=node.dataset.deepId||'';
                     const live=window.deepCanvasState.items.find(x=>x.id===id&&x.type==='media');
-                    if(live) preservedMedia.set(id,node);
+                    const signature=live?JSON.stringify([live.src,live.mediaKind,live.crop,live.cover,live.gifCover]):'';
+                    if(live&&node._deepBoundItem===live&&node._deepMediaSignature===signature)preservedMedia.set(id,node);
                 });
                 // 先摘下媒体节点，避免 innerHTML 清空时让所有图片/GIF/视频重新加载。
                 preservedMedia.forEach(node=>{try{node.remove();}catch(_){}});
@@ -10072,9 +10242,12 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                 el.className='deep-canvas-item '+(item.type==='media'?'deep-canvas-media ':'')+(item.type==='text'?'deep-canvas-text ':'')+(item.type==='link'?'deep-canvas-link ':'')+(item.id===window.deepCanvasSelected?' deep-canvas-selected ':'')+(item.type==='text' && (window.deepTextTool||item.editing)?' tool-visible':''); el.dataset.deepId=item.id; el.style.left=item.x+'px';el.style.top=item.y+'px';el.style.width=item.w+'px';el.style.height=item.h+'px'; if(['media','text','link'].includes(item.type))el.style.zIndex=String(20+(Number(item.layer)||0)); if(window.deepConnectPending?.includes(item.id))el.classList.add('deep-connect-pending');
                 if(item.type==='text'){el.classList.toggle('has-border',!!item.border);el.classList.toggle('editing',!!item.editing);el.dataset.fontSize=(Math.round((Number(item.fontSize)||18)*10)/10).toString();el.style.borderColor=item.borderColor||'#3b82f6';el.style.fontSize=(item.fontSize||18)+'px';el.style.color=item.color||'#334155';el.style.textAlign=item.textAlign||'left';el.style.opacity='1';el.style.fontWeight=item.bold?'700':'400';el.style.fontStyle=item.italic?'italic':'normal';el.style.textDecoration='none';el.innerHTML=`<div class="deep-text-content">${item.html||window.deepEsc(item.text||'')}</div>`; const tc=el.querySelector('.deep-text-content'); if(tc) tc.contentEditable=item.editing?'true':'false'; if(tc){window.deepApplyCanonicalTextBoxStyle(tc,{editing:!!item.editing,height:item.h});tc.style.fontSize=(item.fontSize||18)+'px';tc.style.opacity=item.opacity??1;tc.style.textAlign=item.textAlign||'left';tc.style.textDecoration=[item.underline?'underline':'',item.strike?'line-through':''].filter(Boolean).join(' ')||'none';tc.style.textDecorationColor='currentColor';tc.style.textDecorationSkipInk='none';window.deepSyncDecorationGeometry?.(tc);requestAnimationFrame(()=>{const live=document.querySelector(`[data-deep-id="${CSS.escape(item.id)}"] .deep-text-content`);if(live){window.deepSyncDecorationGeometry?.(live);if(!item._manualResizing)window.deepAutoFitTextItem(item,live);if(item.editing)window.deepBindTextAutoFit(item,live);}});}}
                 else if(item.type==='media'){const c=item.crop||{scale:1,offsetX:0,offsetY:0,stretchX:1,stretchY:1};if(item.mediaKind==='video'){if(!reusedMedia){el.innerHTML='';window.deepRenderVideoCover(el,item,false);}}else{const deepAnimated=window.isAnimatedImageSource(item.src,item),deepShown=deepAnimated&&item.gifCover?item.gifCover:item.src;if(!reusedMedia||!el.firstElementChild||el.firstElementChild.getAttribute('src')!==deepShown){el.innerHTML=`<img src="${window.deepEsc(deepShown)}" alt="深入描述媒体">`;}const md=el.firstElementChild;const applyMedia=()=>{if(!md)return;const scale=Math.max(0.01,Number(c.scale)||1);md.style.width='auto';md.style.height='auto';md.style.left='50%';md.style.top='50%';const stretchX=Math.max(.85,Math.min(1.15,Number(c.stretchX)||1)),stretchY=Math.max(.85,Math.min(1.15,Number(c.stretchY)||1));md.style.transform=`translate(-50%,-50%) translate(${Number(c.offsetX)||0}px,${Number(c.offsetY)||0}px) scale(${scale}) scale(${stretchX},${stretchY})`;};if(md.complete)applyMedia();else md.addEventListener('load',applyMedia,{once:true});}}else if(item.type==='link'){const safeUrl=window.deepEsc(item.url||'');const safeLabel=window.deepEsc(item.label||item.url||'网址');el.innerHTML=`<div class="deep-link-inner"><span class="deep-link-icon"><i class="fa-solid fa-globe"></i></span><span class="deep-link-copy"><span class="deep-link-label">${safeLabel}</span><span class="deep-link-url">${safeUrl}</span></span><i class="fa-solid fa-arrow-up-right-from-square text-[11px] text-slate-400"></i></div>`;el.title='双击编辑网址';}else if(item.type==='connector'){ el.remove(); return; }
-                st.appendChild(el); window.deepBindItem(el,item); el.addEventListener('click',e=>{e.stopPropagation(); if(el._deepConnectPicked){el._deepConnectPicked=false;return;} if(window.deepConnectMode){window.deepHandleConnectPick(item);return;} window.deepCanvasSelected=item.id; window.deepRefreshSelectionVisual?.(); if(item.type==='text' && window.deepTextTool) window.renderDeepCanvas(false); else window.deepPositionTextTools?.();});
+                st.appendChild(el);
+                el._deepBoundItem=item;el._deepMediaSignature=JSON.stringify([item.src,item.mediaKind,item.crop,item.cover,item.gifCover]);
+                if(!reusedMedia){window.deepBindItem(el,item); el.addEventListener('click',e=>{e.stopPropagation(); if(el._deepConnectPicked){el._deepConnectPicked=false;return;} if(window.deepConnectMode){window.deepHandleConnectPick(item);return;} window.deepCanvasSelected=item.id; window.deepRefreshSelectionVisual?.(); if(item.type==='text' && window.deepTextTool) window.renderDeepCanvas(false); else window.deepPositionTextTools?.();});
                 if(item.type==='media'){ el.addEventListener('dblclick',e=>{ e.preventDefault(); e.stopPropagation(); if(Date.now() < (el._deepSuppressCropUntil||0)) return; window.deepCanvasSelected=item.id; window.deepCropSelected(); }); }
                 if(item.type==='link'){ el.addEventListener('dblclick',e=>{ e.preventDefault(); e.stopPropagation(); if(window.deepDrawToolsActive)return; window.deepCanvasSelected=item.id; window.deepEditUrl(item); }); }
+                }
             });
             preservedMedia.forEach(node=>{try{node.remove();}catch(_){}});
             window.deepRenderDrawPaths();
@@ -10197,6 +10370,17 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                     st.addEventListener('pointermove',move);window.addEventListener('pointerup',up);e.preventDefault();
                 }
             };
+            if(selectionBefore){
+                window.deepSavedTextSelectionSnapshot=selectionBefore;
+                const root=st.querySelector(`[data-deep-id="${CSS.escape(selectionBefore.itemId)}"] .deep-text-content`);
+                if(textFocused)root?.focus?.({preventScroll:true});
+                window.deepRestoreTextSelection?.();
+                requestAnimationFrame(()=>requestAnimationFrame(()=>{
+                    if(selectionEpoch!==window._deepSelectionRestoreEpoch)return;
+                    window._deepSelectionRestoring=false;
+                    if(window.deepCanvasSelected===selectionBefore.itemId){window.deepRestoreTextSelection?.();window.deepRememberTextSelection?.();}
+                }));
+            }
         };
         window.deepDuplicateDrawSelection=function(selectionIds){
             const state=window.deepCanvasState;
@@ -10334,7 +10518,7 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
                             <span id="deepCropVideoTimeLabel" class="w-24 text-right font-mono text-[10px] text-slate-500">0:00 / 0:00</span>
                             <button id="deepCropSetCover" type="button" class="px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100"><i class="fa-solid fa-image mr-1"></i>设为视频封面</button>
                         </div>`:''}
-                        <div class="flex items-center gap-3 text-xs"><span class="font-semibold shrink-0">内容缩放</span><input id="deepCropScale" type="range" min="0.01" max="20" step="0.01" class="flex-1 h-2 accent-indigo-600 cursor-pointer" /><input id="deepCropScaleNumber" type="number" min="1" max="2000" step="1" class="w-20 px-2 py-1 border rounded-md font-mono text-xs text-right" /><span id="deepCropScaleValue" class="w-14 text-right font-mono text-slate-600">100%</span></div><div class="flex justify-between gap-2 mt-4"><div class="flex gap-2"><button id="deepCropAutoFill" class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-semibold">自动填充</button><button id="deepCropUndoAutoFill" class="px-3 py-2 border border-slate-200 bg-white text-slate-500 rounded-lg text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed" disabled>取消填充</button></div><div class="flex gap-2"><button id="deepCropCancel" class="px-4 py-2 border rounded-lg text-sm">取消</button><button id="deepCropReset" class="px-4 py-2 border rounded-lg text-sm">恢复原图</button><button id="deepCropOk" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">确定</button></div></div>
+                        <div class="deep-crop-scale-row flex items-center gap-3 text-xs"><span class="font-semibold shrink-0">内容缩放</span><input id="deepCropScale" type="range" min="0.01" max="20" step="0.01" class="flex-1 h-2 accent-indigo-600 cursor-pointer" /><input id="deepCropScaleNumber" type="number" min="1" max="2000" step="1" class="w-20 px-2 py-1 border rounded-md font-mono text-xs text-right" /><span id="deepCropScaleValue" class="w-14 text-right font-mono text-slate-600">100%</span></div><div class="deep-crop-actions flex justify-between gap-2 mt-4"><div class="flex gap-2"><button id="deepCropAutoFill" class="px-4 py-2 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-semibold">自动填充</button><button id="deepCropUndoAutoFill" class="px-3 py-2 border border-slate-200 bg-white text-slate-500 rounded-lg text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed" disabled>取消填充</button></div><div class="flex gap-2"><button id="deepCropCancel" class="px-4 py-2 border rounded-lg text-sm">取消</button><button id="deepCropReset" class="px-4 py-2 border rounded-lg text-sm">恢复原图</button><button id="deepCropOk" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold">确定</button></div></div>
                     </div>
                 </div>`;
             const viewport=document.getElementById('deepCropViewport'),wrap=document.getElementById('deepCropPreviewWrap'),preview=document.getElementById('deepCropPreview');
@@ -10442,6 +10626,11 @@ html.qinger-user-hidden #qingerInventory{width:210px!important}
             const paint=()=>{raf=0;crop.scale=Math.max(.01,Math.min(20,Number(crop.scale)||1));syncScaleUI();media.style.transform=`translate(-50%,-50%) translate(${crop.offsetX}px,${crop.offsetY}px) scale(${crop.scale}) scale(${crop.stretchX||1},${crop.stretchY||1})`;};
             const update=()=>{if(!raf)raf=requestAnimationFrame(paint);};scaleInput.oninput=()=>{crop.scale=Math.max(.01,Math.min(20,Number(scaleInput.value)||1));update();};if(scaleNumber){const applyNumber=()=>{crop.scale=Math.max(.01,Math.min(20,(Number(scaleNumber.value)||100)/100));update();};scaleNumber.onchange=applyNumber;scaleNumber.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();applyNumber();scaleNumber.blur();}};}preview.onwheel=e=>{e.preventDefault();crop.scale=Math.max(.01,Math.min(20,crop.scale+(e.deltaY<0?.02:-.02)));update();};
             let drag=null;preview.onpointerdown=e=>{e.preventDefault();drag={sx:e.clientX,sy:e.clientY,ox:crop.offsetX,oy:crop.offsetY,id:e.pointerId};preview.setPointerCapture?.(e.pointerId);preview.style.cursor='grabbing';};preview.onpointermove=e=>{if(!drag)return;e.preventDefault();crop.offsetX=drag.ox+(e.clientX-drag.sx)/Math.max(.001,displayScale);crop.offsetY=drag.oy+(e.clientY-drag.sy)/Math.max(.001,displayScale);update();};const endDrag=()=>{drag=null;preview.style.cursor='grab';};preview.onpointerup=endDrag;preview.onpointercancel=endDrag;preview.style.cursor='grab';preview.style.touchAction='none';
+            window.bindMobileTransformGestures(preview,{
+                min:.01,max:20,onTakeover:()=>{drag=null;},
+                get:()=>{const r=preview.getBoundingClientRect();return {scale:crop.scale,x:r.width/2+crop.offsetX*displayScale,y:r.height/2+crop.offsetY*displayScale};},
+                apply:next=>{const r=preview.getBoundingClientRect();crop.scale=next.scale;crop.offsetX=(next.x-r.width/2)/Math.max(.001,displayScale);crop.offsetY=(next.y-r.height/2)/Math.max(.001,displayScale);update();}
+            });
 
             document.querySelectorAll('#deepCropFrameHandles [data-crop-frame-handle]').forEach(handle=>{
                 handle.onpointerdown=e=>{
@@ -12380,6 +12569,7 @@ viewer.style.visibility='';
 
         window.openVideoCropModal = async function(index) {
             activeVideoCropIndex = index;
+            window.bindMobileVideoCoverGestures();
             const vidObj = window.editingVideos[index];
             if (!vidObj) return;
 
@@ -12528,12 +12718,13 @@ viewer.style.visibility='';
 
                 const canvas=document.createElement('canvas');
                 const maxSide=window.isPhoneLikeDevice?.()?960:1600;
-                const scale=Math.min(1,maxSide/Math.max(capturePlayer.videoWidth,capturePlayer.videoHeight));
-                canvas.width=Math.max(1,Math.round(capturePlayer.videoWidth*scale));
-                canvas.height=Math.max(1,Math.round(capturePlayer.videoHeight*scale));
+                const visible=window.videoCoverVisibleSourceRect(player);
+                const scale=Math.min(1,maxSide/Math.max(visible.w,visible.h));
+                canvas.width=Math.max(1,Math.round(visible.w*scale));
+                canvas.height=Math.max(1,Math.round(visible.h*scale));
                 const ctx=canvas.getContext('2d',{alpha:false});
                 if(!ctx) throw new Error('capture_canvas_context_failed');
-                ctx.drawImage(capturePlayer,0,0,canvas.width,canvas.height);
+                ctx.drawImage(capturePlayer,visible.x,visible.y,visible.w,visible.h,0,0,canvas.width,canvas.height);
                 const target=window.editingVideos[activeVideoCropIndex];
                 if(!target) throw new Error('capture_target_missing');
                 const uploadedCover=await window.canvasToCloudCover(canvas,'video_cover',0.84,target.coverCloudPath||'',target.cloudPath||'', 'video', true);
@@ -13621,7 +13812,7 @@ viewer.style.visibility='';
                     holder.innerHTML=`<div class="media-drag-item relative w-20 h-16 rounded-lg overflow-hidden border border-slate-200 group bg-slate-900 flex cursor-grab" draggable="${window.isLocked?'false':'true'}" data-media-index="${idx}" data-media-id="${window.escapeHtml(mediaId)}">
                         ${imgObj.isAnimated&&imgObj.gifCover?window.getAnimatedCoverCropPreviewHtml(imgObj):imgObj.isAnimated&&(imgObj.gifCrop||imgObj.crop)?window.getAnimatedCropPreviewHtml(imgObj):`<img src="${window.escapeHtml(previewSrc)}" class="w-full h-full object-cover" draggable="false">`}
                         <span class="absolute top-1 left-1 z-10 text-white/80 text-[9px] pointer-events-none"><i class="fa-solid fa-grip-vertical"></i></span>
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                        <div class="media-image-actions absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
                             ${imgObj.isAnimated?`<button type="button" data-image-edit title="编辑动图" class="bg-fuchsia-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px]"><i class="fa-solid fa-film"></i></button>`:`<button type="button" data-image-crop title="裁剪图片" class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px]"><i class="fa-solid fa-crop"></i></button>`}
                             ${deepOn?`<button type="button" data-deep-edit-btn data-image-deep title="深入描述" class="bg-violet-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px]"><i class="fa-solid fa-feather-pointed"></i></button>`:''}
                             <button type="button" data-image-remove title="删除图片" class="bg-rose-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-[10px]"><i class="fa-solid fa-xmark"></i></button>
@@ -13839,6 +14030,11 @@ viewer.style.visibility='';
                 try { container.releasePointerCapture(e.pointerId); } catch (_) {}
             };
 
+            window.bindMobileTransformGestures(container,{
+                min:.15,max:4,onTakeover:()=>{mode=null;handle=null;},
+                get:()=>({scale:cropState.scale||1,x:cropState.imgX,y:cropState.imgY}),
+                apply:next=>{cropState.scale=next.scale;cropState.imgX=next.x;cropState.imgY=next.y;applyCropUI();}
+            });
             container.addEventListener('pointerdown', onDown);
             container.addEventListener('pointermove', onMove);
             container.addEventListener('pointerup', onUp);
