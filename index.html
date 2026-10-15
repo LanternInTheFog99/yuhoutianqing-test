@@ -3815,9 +3815,9 @@ body.notification-comment-open #fullscreenViewer .detail-fixed-header>button[onc
                     if(data?.retryAfterMs!=null) err.retryAfterMs=Number(data.retryAfterMs)||0;
                     throw err;
                 }
-                if(['getOwnComments','getNotifications','getOwnIdentityHistory','listMediaAssets'].includes(action)&&requestedAccountSession!==(window.getAccountSessionToken?.()||''))throw Object.assign(new Error('账号状态已变化，请重新打开'),{code:'account_state_changed'});
+                if(['getOwnComments','getNotifications','getOwnIdentityHistory','listMediaAssets','getMediaDeep'].includes(action)&&requestedAccountSession!==(window.getAccountSessionToken?.()||''))throw Object.assign(new Error('账号状态已变化，请重新打开'),{code:'account_state_changed'});
                 if (data.version) window._cloudbaseTimelineVersion = String(data.version);
-                if(['getMediaUploadMetadata','finalizeMediaUpload','activatePendingMedia','copyMediaAsset','renameMediaAsset','deleteMediaAsset','upsertEvent','deleteEvent','accountLogout','accountLogin','accountRename'].includes(action))window.invalidateMediaLibrary?.();
+                if(['getMediaUploadMetadata','finalizeMediaUpload','activatePendingMedia','copyMediaAsset','renameMediaAsset','deleteMediaAsset','upsertEvent','deleteEvent','accountLogout','accountLogin','accountRename','saveMediaDeep'].includes(action))window.invalidateMediaLibrary?.();
                 return data;
             } finally {
                 clearTimeout(timer);
@@ -3910,6 +3910,7 @@ body.notification-comment-open #fullscreenViewer .detail-fixed-header>button[onc
                 purpose:finalPurpose,
                 finalPurpose:'',coverEventLabel:String(options.coverEventLabel||''),
                 coverSourcePath:String(options?.coverSourcePath||''),
+                deepOwnerCloudPath:String(options?.deepOwnerCloudPath||''),
                 coverKind:String(options?.coverKind||''),
                 temporary:useTemp,
                 pendingOwner:String(window._editMediaTxn?.sessionId||''),
@@ -4203,9 +4204,22 @@ body.notification-comment-open #fullscreenViewer .detail-fixed-header>button[onc
                 previewDuration:window.normalizeVideoPreviewDuration?window.normalizeVideoPreviewDuration(saved.previewDuration,4):(Number(saved.previewDuration)||4)
             };
         };
-        window.addCloudAssetToSingleImage=function(a){if(!a)return;const inherited=window.cloudAssetInheritedImage(a);window.editingImageFiles.push({mediaId:'img_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9),original:a.url,originalFull:a.url,outer:(a.folder==='picture'&&inherited.pictureCover)||a.url,inner:(a.folder==='picture'&&inherited.pictureCover)||a.url,collection:(a.folder==='picture'&&inherited.pictureCover)||a.url,isAnimated:a.folder==='gif',crop:inherited.crop,pictureCoverCloudPath:inherited.pictureCoverCloudPath||'',gifCrop:inherited.gifCrop,gifCoverCrop:inherited.gifCoverCrop,cloudPath:a.cloudPath||'',gifCover:inherited.gifCover,gifCoverCloudPath:inherited.gifCoverCloudPath,gifDurationMs:inherited.gifDurationMs,gifDurationSource:inherited.gifDurationSource});window.renderMicroPreviews?.();};
-        window.addCloudAssetToSingleVideo=function(a){if(!a)return;const inherited=window.cloudAssetInheritedVideo(a);window.editingVideos.push({mediaId:'vid_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9),url:a.url,previewDuration:inherited.previewDuration,blobUrl:'',cover:inherited.cover,coverCloudPath:inherited.coverCloudPath,mime:a.mime||'video/mp4',name:a.originalName||'',title:'',cloudPath:a.cloudPath||''});window.renderVideoPreviews?.();};
-        window.addCloudAssetToMulti=function(seg,kind,a){const s=window.multiTimeDraft?.[seg];if(!s||!a)return;if(kind==='image'){const inherited=window.cloudAssetInheritedImage(a);s.images.push(window.multiNormalizeImage({mediaId:window.multiMediaId(),originalFull:a.url,original:a.url,outer:(a.folder==='picture'&&inherited.pictureCover)||a.url,inner:(a.folder==='picture'&&inherited.pictureCover)||a.url,collection:(a.folder==='picture'&&inherited.pictureCover)||a.url,isAnimated:a.folder==='gif',crop:inherited.crop,pictureCoverCloudPath:inherited.pictureCoverCloudPath||'',gifCrop:inherited.gifCrop,gifCoverCrop:inherited.gifCoverCrop,gifCover:inherited.gifCover,gifCoverCloudPath:inherited.gifCoverCloudPath,gifDurationMs:inherited.gifDurationMs,gifDurationSource:inherited.gifDurationSource,deepDescription:null,cloudPath:a.cloudPath||''}));}else{const inherited=window.cloudAssetInheritedVideo(a);s.videos.push(window.multiNormalizeVideo({url:a.url,blobUrl:'',cover:inherited.cover,coverCloudPath:inherited.coverCloudPath,title:String(a.originalName||'').replace(/\.[^.]+$/,''),mime:a.mime||'',previewDuration:inherited.previewDuration,deepDescription:null,cloudPath:a.cloudPath||''}));}window.multiRenderCurrentPage?.();};
+        window.readSharedMediaDeep=async function(path){return await timelineApiPost('getMediaDeep',{cloudPath:path},{auth:'edit',timeoutMs:25000});};
+        window.sharedDeepForReference=async function(a){
+            const state=await window.readSharedMediaDeep(a.cloudPath);
+            return state.description?window.deepClone(state.description):null;
+        };
+        window.applySharedMediaDeep=function(path,description,revision){
+            const seen=new WeakSet();const walk=value=>{if(!value||typeof value!=='object'||seen.has(value))return;seen.add(value);
+                if(!Array.isArray(value)&&String(value.cloudPath||'')===path){value.deepDescription=window.deepClone(description);value.deepMediaRevision=revision;window._savedDeepDraftsByObject?.delete?.(value);}
+                for(const [key,child] of Object.entries(value))if(key!=='deepDescription')walk(child);
+            };
+            [window.events,window.editingImageFiles,window.editingVideos,window.multiTimeDraft,window._editMediaTxn?.images,window._editMediaTxn?.videos].forEach(walk);
+        };
+        window.currentDeepOwnerPath=function(){return String(window.deepResolveTargetObject?.(window.deepCanvasTarget)?.cloudPath||'');};
+        window.addCloudAssetToSingleImage=async function(a){if(!a)return;const deepDescription=await window.sharedDeepForReference(a);const inherited=window.cloudAssetInheritedImage(a);window.editingImageFiles.push({mediaId:'img_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9),original:a.url,originalFull:a.url,outer:(a.folder==='picture'&&inherited.pictureCover)||a.url,inner:(a.folder==='picture'&&inherited.pictureCover)||a.url,collection:(a.folder==='picture'&&inherited.pictureCover)||a.url,isAnimated:a.folder==='gif',crop:inherited.crop,pictureCoverCloudPath:inherited.pictureCoverCloudPath||'',gifCrop:inherited.gifCrop,gifCoverCrop:inherited.gifCoverCrop,cloudPath:a.cloudPath||'',deepDescription,gifCover:inherited.gifCover,gifCoverCloudPath:inherited.gifCoverCloudPath,gifDurationMs:inherited.gifDurationMs,gifDurationSource:inherited.gifDurationSource});window.renderMicroPreviews?.();};
+        window.addCloudAssetToSingleVideo=async function(a){if(!a)return;const deepDescription=await window.sharedDeepForReference(a);const inherited=window.cloudAssetInheritedVideo(a);window.editingVideos.push({mediaId:'vid_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9),url:a.url,previewDuration:inherited.previewDuration,blobUrl:'',cover:inherited.cover,coverCloudPath:inherited.coverCloudPath,mime:a.mime||'video/mp4',name:a.originalName||'',title:'',deepDescription,cloudPath:a.cloudPath||''});window.renderVideoPreviews?.();};
+        window.addCloudAssetToMulti=async function(seg,kind,a){const s=window.multiTimeDraft?.[seg];if(!s||!a)return;const deepDescription=await window.sharedDeepForReference(a);if(kind==='image'){const inherited=window.cloudAssetInheritedImage(a);s.images.push(window.multiNormalizeImage({mediaId:window.multiMediaId(),originalFull:a.url,original:a.url,outer:(a.folder==='picture'&&inherited.pictureCover)||a.url,inner:(a.folder==='picture'&&inherited.pictureCover)||a.url,collection:(a.folder==='picture'&&inherited.pictureCover)||a.url,isAnimated:a.folder==='gif',crop:inherited.crop,pictureCoverCloudPath:inherited.pictureCoverCloudPath||'',gifCrop:inherited.gifCrop,gifCoverCrop:inherited.gifCoverCrop,gifCover:inherited.gifCover,gifCoverCloudPath:inherited.gifCoverCloudPath,gifDurationMs:inherited.gifDurationMs,gifDurationSource:inherited.gifDurationSource,deepDescription,cloudPath:a.cloudPath||''}));}else{const inherited=window.cloudAssetInheritedVideo(a);s.videos.push(window.multiNormalizeVideo({url:a.url,blobUrl:'',cover:inherited.cover,coverCloudPath:inherited.coverCloudPath,title:String(a.originalName||'').replace(/\.[^.]+$/,''),mime:a.mime||'',previewDuration:inherited.previewDuration,deepDescription,cloudPath:a.cloudPath||''}));}window.multiRenderCurrentPage?.();};
 
         // 写入状态与“是否已连接云端”分离：保存期间仍保持编辑能力，避免按钮/功能被反复禁用。
         window._timelinePendingWrites = 0;
@@ -8168,17 +8182,23 @@ body.notification-comment-open #fullscreenViewer .detail-fixed-header>button[onc
         window.deepCreateSeedCopy=async function(type,obj){
             const src=window.deepGetSrc(type,obj); const cp=String(obj?.cloudPath||'');
             if(!src||!cp)return {src,cloudPath:cp};
-            try{const r=await fetch(src,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const blob=await r.blob();let base=(cp.split('/').pop()||'media').replace(/\.[^.]+$/,'');const ext=(cp.split('/').pop()||'').match(/(\.[^.]+)$/)?.[1]||'';base=base.replace(/_[a-z0-9]+_[a-f0-9]{8}$/i,'').replace(/_[a-f0-9]{8}$/i,'');const name=base+'_desc'+ext;const file=new File([blob],name,{type:blob.type||obj?.mime||'application/octet-stream'});const up=await window.uploadLargeMediaToCloudBase(file,{purpose:type==='video'?'video':(obj?.isAnimated?'gif':'picture')});return {src:up.url,cloudPath:up.cloudPath};}catch(e){console.warn('深入描述默认媒体副本创建失败，回退原媒体',e);return {src,cloudPath:cp};}
+            try{const r=await fetch(src,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const blob=await r.blob();let base=(cp.split('/').pop()||'media').replace(/\.[^.]+$/,'');const ext=(cp.split('/').pop()||'').match(/(\.[^.]+)$/)?.[1]||'';base=base.replace(/_[a-z0-9]+_[a-f0-9]{8}$/i,'').replace(/_[a-f0-9]{8}$/i,'');const name=base+'_desc'+ext;const file=new File([blob],name,{type:blob.type||obj?.mime||'application/octet-stream'});const up=await window.uploadLargeMediaToCloudBase(file,{purpose:type==='video'?'video':(obj?.isAnimated?'gif':'picture'),deepOwnerCloudPath:cp});return {src:up.url,cloudPath:up.cloudPath};}catch(e){console.warn('深入描述默认媒体副本创建失败，回退原媒体',e);return {src,cloudPath:cp};}
         };
         window.openDeepDescriptionEditor = async function(type,index,targetOverride=null){
             const target=targetOverride||{type,index};
             const obj=window.deepResolveTargetObject(target); if(!obj)return;
             const openEpoch=window._deepOpenEpoch=(Number(window._deepOpenEpoch)||0)+1;
+            let sharedState=null;
+            if(obj.cloudPath){
+                window.deepSetMediaLoading?.(true,'正在读取深入描述…');
+                try{sharedState=await window.readSharedMediaDeep(obj.cloudPath);if(openEpoch!==window._deepOpenEpoch)return;obj.deepDescription=window.deepClone(sharedState.description);window._savedDeepDraftsByObject?.delete?.(obj);
+                }catch(e){console.error('shared deep read failed',e);window.showToast?.('深入描述读取失败，请重试','error');return;}finally{if(openEpoch===window._deepOpenEpoch)window.deepSetMediaLoading?.(false);}
+            }
             const m=window.deepEnsureModal();
             window.deepCanvasTarget={...target};
             window.beginEditMediaTxn?.();
             window._deepEditSession={
-                target:{...target},
+                target:{...target},sharedRevision:sharedState?.revision||0,
                 originalDeep:window.deepClone(obj.deepDescription),
                 originalEnabled:window.deepDescriptionIsEnabled(obj.deepDescription),
                 tempMark:window.getTempUploadMark?.()||0
@@ -8387,20 +8407,29 @@ body.notification-comment-open #fullscreenViewer .detail-fixed-header>button[onc
             const modal=document.getElementById('deepDescriptionModal');if(window._deepBackupInputHandler){['input','change','pointerup','click'].forEach(type=>modal?.removeEventListener(type,window._deepBackupInputHandler,true));window._deepBackupInputHandler=null;}
         };
         window.saveDeepDescriptionEditor=async function(){
-            const target=window.deepCanvasTarget;if(!target)return;
-            if(!await window.deepAppConfirm({title:'确认保存深入描述？',desc:'请检查画布内容是否无误，确认后将保存当前深入描述。',confirmText:'确认保存'}))return;
-            const saveBtn=document.getElementById('deepSaveBtn');const oldSaveText=saveBtn?.textContent||'保存';if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='正在保存…';}
-            const obj=window.deepResolveTargetObject?.(target);if(!obj)return;
-            const sessionObj=window.deepResolveTargetObject?.(window._deepEditSession?.target);
-            if(sessionObj!==obj){window.showToast?.('当前深入描述目标已变化，请重新打开后编辑','error');return;}
-            window.deepDescriptionEnabledDraft=window.deepDescriptionEnabledDraft!==false;await window.deepBackupNow?.(true);window.deepWriteCanvasToTarget?.();
-            if(obj.deepDescription)obj.deepDescription._pendingOuterSave=true;
-            try{
-                await window.promoteTempUploadsSince?.(window._deepEditSession?.tempMark||0,obj.deepDescription);
-                window.saveDeepDraftSnapshot?.(target,obj.deepDescription);
-                if(target.multi)window.multiRenderSegments();else if(target.type==='image')window.renderMicroPreviews();else window.renderVideoPreviews();
-                window.showToast?.('深入描述已保存','success');window.closeDeepDescriptionEditor(false);
-            }catch(err){console.error('深入描述保存失败',err);window.showToast?.('深入描述保存失败：'+String(err?.message||err),'error');}finally{if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=oldSaveText;}}
+            const target=window.deepCanvasTarget,obj=window.deepResolveTargetObject?.(target);if(!target||!obj)return;
+            if(window.deepResolveTargetObject?.(window._deepEditSession?.target)!==obj){window.showToast?.('当前深入描述目标已变化，请重新打开后编辑','error');return;}
+            const shared=!!obj.cloudPath;
+            await window.deepAppConfirm({title:'确认保存深入描述？',desc:shared?'保存后，所有引用此媒体的位置都会同步使用当前深入描述。':'请检查画布内容是否无误，确认后将保存当前深入描述。',confirmText:'确认保存',busyText:'正在保存...',onConfirm:async()=>{
+                return await window.withCloudWriteOperation(async()=>{
+                    const previous=window.deepClone(obj.deepDescription);let committed=false;
+                    try{
+                        window.deepDescriptionEnabledDraft=window.deepDescriptionEnabledDraft!==false;
+                        await window.deepBackupNow?.(true);window.deepWriteCanvasToTarget?.();
+                        if(shared){
+                            await window.ensureAutomaticFirstFrameCovers({deepDescription:obj.deepDescription});
+                            const result=await timelineApiPost('saveMediaDeep',{cloudPath:obj.cloudPath,description:obj.deepDescription,baseRevision:window._deepEditSession?.sharedRevision||0,eventId:String(target.multi?window.multiTimeEditingId:window.editingEventId||'')},{auth:'edit',timeoutMs:55000});
+                            committed=true;window._deepEditSession.sharedRevision=result.revision;
+                            window.applySharedMediaDeep(obj.cloudPath,result.description,result.revision);obj.deepDescription=window.deepClone(result.description);
+                            const serialized=JSON.stringify(result.description||{});if(window._editMediaTxn)window._editMediaTxn.tempUploads=window._editMediaTxn.tempUploads.filter(x=>String(x.tempPath)===String(obj.cloudPath)||!serialized.includes(String(x.tempPath)));
+                        }else{await window.promoteTempUploadsSince?.(window._deepEditSession?.tempMark||0,obj.deepDescription);}
+                        window.saveDeepDraftSnapshot?.(target,obj.deepDescription);
+                        if(target.multi)window.multiRenderSegments();else if(target.type==='image')window.renderMicroPreviews();else window.renderVideoPreviews();
+                        await window.deepBackupDelete?.(window.deepBackupKey(target));await window.closeDeepDescriptionEditor(false);
+                        window.showToast?.('深入描述已保存','success');return true;
+                    }catch(e){if(!committed)obj.deepDescription=previous;console.error('shared deep save failed',e);throw e;}
+                });
+            }});
         };
         window.deepPositionTextTools=function(){
             const tools=document.getElementById('deepTextTools');
@@ -8658,7 +8687,7 @@ body.notification-comment-open #fullscreenViewer .detail-fixed-header>button[onc
                     finally{window.deepSetMediaLoading?.(false);if(kind==='video'){media.removeAttribute('src');media.load();}}
                 }});return;
             }
-            if(useLocal==='local'){ const input=document.createElement('input'); input.type='file'; input.accept='image/*,video/*'; input.onchange=async()=>{const f=input.files?.[0];if(!f)return;window.deepSetMediaLoading?.(true,'正在读取并加载本地媒体…');try{const media=await window.uploadLargeMediaToCloudBase(f,{silentNotice:true});const src=media.url,kind=f.type.startsWith('video/')?'video':'image';if(kind==='image'){const im=new Image();im.onload=()=>addBySrc(src,kind,im.naturalWidth,im.naturalHeight,media.cloudPath||'');im.onerror=()=>addBySrc(src,kind,640,360,media.cloudPath||'');im.src=src;}else{const v=document.createElement('video');v.preload='metadata';v.onloadedmetadata=()=>addBySrc(src,kind,v.videoWidth,v.videoHeight,media.cloudPath||'');v.onerror=()=>addBySrc(src,kind,640,360,media.cloudPath||'');v.src=src;}}catch(err){window.deepSetMediaLoading?.(false);window._cloudUploadNotice?.('',false);window.showToast?.(err?.message||'本地媒体上传失败','error');}}; input.click(); return; }
+            if(useLocal==='local'){ const input=document.createElement('input'); input.type='file'; input.accept='image/*,video/*'; input.onchange=async()=>{const f=input.files?.[0];if(!f)return;window.deepSetMediaLoading?.(true,'正在读取并加载本地媒体…');try{const media=await window.uploadLargeMediaToCloudBase(f,{silentNotice:true,deepOwnerCloudPath:window.currentDeepOwnerPath()});const src=media.url,kind=f.type.startsWith('video/')?'video':'image';if(kind==='image'){const im=new Image();im.onload=()=>addBySrc(src,kind,im.naturalWidth,im.naturalHeight,media.cloudPath||'');im.onerror=()=>addBySrc(src,kind,640,360,media.cloudPath||'');im.src=src;}else{const v=document.createElement('video');v.preload='metadata';v.onloadedmetadata=()=>addBySrc(src,kind,v.videoWidth,v.videoHeight,media.cloudPath||'');v.onerror=()=>addBySrc(src,kind,640,360,media.cloudPath||'');v.src=src;}}catch(err){window.deepSetMediaLoading?.(false);window._cloudUploadNotice?.('',false);window.showToast?.(err?.message||'本地媒体上传失败','error');}}; input.click(); return; }
         };
 
         // 可直接粘贴包含说明文字的内容，自动提取其中第一个 http/https 网址。
@@ -12584,6 +12613,7 @@ viewer.style.visibility='';
         };
 
         window.closeEditModal = function() {
+            window._deepOpenEpoch=(Number(window._deepOpenEpoch)||0)+1;window.deepSetMediaLoading?.(false);
             window.rollbackEditMediaTxn?.();
             void window.deepBackupDeleteForEvent?.(window.editingEventId);
             const returnStackDate=window._isEditingFromStack ? window._editingFromStackDate : null;
@@ -14556,9 +14586,9 @@ viewer.style.visibility='';
                 const hasCanvas=[...(window.editingImageFiles||[]),...(window.editingVideos||[])].some(x=>window.deepCanvasHasContent?.(x?.deepDescription));
                 if(hasCanvas){
                     const cb=document.getElementById('deepDescriptionToggle'); if(cb)cb.checked=true;
-                    const ok=await window.deepAppConfirm({title:'确认关闭深入描述？',desc:'关闭后画布数据将被删除，请谨慎点击。',confirmText:'确认关闭',danger:true});
+                    const ok=await window.deepAppConfirm({title:'确认关闭深入描述？',desc:'关闭后，此事件将不再显示深入描述；云端媒体的共享深入描述会保留',confirmText:'确认关闭',danger:true});
                     if(!ok)return; if(cb)cb.checked=false;
-                    [...(window.editingImageFiles||[]),...(window.editingVideos||[])].forEach(x=>{if(x&&typeof x==='object')x.deepDescription=null;});
+                    [...(window.editingImageFiles||[]),...(window.editingVideos||[])].forEach(x=>{if(x&&typeof x==='object'&&!x.cloudPath)x.deepDescription=null;});
                 }
             }
             window.deepDescriptionEnabledDraft = !!enabled;
@@ -15773,6 +15803,7 @@ viewer.style.visibility='';
         window.multiAddSegment=function(){window.multiPersistCurrentPage();window.multiTimeDraft.push(window.multiNewSegment());window.multiTimePage=window.multiTimeDraft.length+1;window.multiRenderEditorShell();};
 
         window.closeMultiTimeEventModal=function(){
+            window._deepOpenEpoch=(Number(window._deepOpenEpoch)||0)+1;window.deepSetMediaLoading?.(false);
             window.rollbackEditMediaTxn?.();
             void window.deepBackupDeleteForEvent?.(window.multiTimeEditingId);
             if(window.multiTimeIsEdit) void window.releaseEventEditLock?.(window.multiTimeEditingId);
@@ -15813,9 +15844,9 @@ viewer.style.visibility='';
                 const hasCanvas=all.some(x=>window.deepCanvasHasContent?.(x?.deepDescription));
                 if(hasCanvas){
                     if(cb)cb.checked=true;
-                    const ok=await window.deepAppConfirm({title:'确认关闭深入描述？',desc:'关闭后画布数据将被删除，请谨慎点击。',confirmText:'确认关闭',danger:true});
+                    const ok=await window.deepAppConfirm({title:'确认关闭深入描述？',desc:'关闭后，此事件将不再显示深入描述；云端媒体的共享深入描述会保留',confirmText:'确认关闭',danger:true});
                     if(!ok)return;
-                    all.forEach(x=>{if(x&&typeof x==='object')x.deepDescription=null;});
+                    all.forEach(x=>{if(x&&typeof x==='object'&&!x.cloudPath)x.deepDescription=null;});
                     if(cb)cb.checked=false;
                 }
             }
